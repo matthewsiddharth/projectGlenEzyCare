@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">GlenEzyCareApps</string>
+    <string name="logo_description">App Logo</string>
+    <string name="dont_have_account">Don\'t have an account? </string>
+    <string name="sign_up">Sign Up</string>
+    <string name="hospital_banner_description">Hospital Banner Image</string>
+    <string name="profile_icon_description">User Profile Icon</string>
+    <string name="profile_pic_description">User Profile Picture</string>
 </resources>

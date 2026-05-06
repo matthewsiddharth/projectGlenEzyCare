@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Staff Management"
+            android:textColor="#FFFFFF"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="25dp"/>
+
+        <EditText
+            android:id="@+id/etStaffName"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:hint="Staff Name"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:background="@drawable/edittext_style"
+            android:padding="15dp"
+            android:layout_marginBottom="15dp"/>
+
+        <EditText
+            android:id="@+id/etStaffEmail"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:hint="Staff Email"
+            android:inputType="textEmailAddress"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:background="@drawable/edittext_style"
+            android:padding="15dp"
+            android:layout_marginBottom="15dp"/>
+
+        <EditText
+            android:id="@+id/etStaffRole"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:hint="Staff Role"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:background="@drawable/edittext_style"
+            android:padding="15dp"
+            android:layout_marginBottom="25dp"/>
+
+        <Button
+            android:id="@+id/btnAddStaff"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Add Staff"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:background="@drawable/button_blue"
+            android:layout_marginBottom="15dp"/>
+
+        <Button
+            android:id="@+id/btnViewStaff"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="View Staff"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:background="@drawable/button_blue"
+            android:layout_marginBottom="15dp"/>
+
+        <Button
+            android:id="@+id/btnEditStaff"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Edit Staff"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:background="@drawable/button_blue"
+            android:layout_marginBottom="15dp"/>
+
+        <Button
+            android:id="@+id/btnDeleteStaff"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Delete Staff"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:backgroundTint="#F44336"/>
+
+    </LinearLayout>
+
+</ScrollView>

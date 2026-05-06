@@ -12,7 +12,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GlenEzyCareApps">
         <activity
-            android:name=".MainActivity"
+            android:name=".StaffManagementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".QueueCallingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".QueueActivity"
+            android:exported="false" />
+        <activity
+            android:name=".QueueStatusActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StaffDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,6 +41,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".PatientHomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AppointmentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
