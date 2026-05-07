@@ -2,13 +2,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/splash_bg">
+    android:background="@drawable/doctor">
 
-    <!-- Slightly faded effect using a semi-transparent white overlay -->
+    <!-- Lower brightness/faded effect using a semi-transparent black overlay -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#99FFFFFF" />
+        android:background="#66000000" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="GlenEzyCare"
-            android:textColor="#1976D2"
+            android:textColor="#FFFFFF"
             android:textSize="32sp"
             android:textStyle="bold" />
 
