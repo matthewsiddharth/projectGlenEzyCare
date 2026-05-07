@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "808426626871",
+    "project_id": "glenezycare-apps",
+    "storage_bucket": "glenezycare-apps.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:808426626871:android:0de76f5e0034bd898744b2",
+        "android_client_info": {
+          "package_name": "com.example.glenezycareapps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiYIrekTQ7cjZGzBSnHgxiMYMhaTQxQnY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

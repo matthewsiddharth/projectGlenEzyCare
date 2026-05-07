@@ -24,6 +24,7 @@
             android:contentDescription="App Logo" />
 
         <TextView
+            android:id="@+id/tvAppName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -31,6 +32,17 @@
             android:textColor="#FFFFFF"
             android:textSize="32sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvSlogan"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="appointment booking at specialist clinics in Gleneagles Hospital"
+            android:textColor="#E0E0E0"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:alpha="0" />
 
     </LinearLayout>
 
