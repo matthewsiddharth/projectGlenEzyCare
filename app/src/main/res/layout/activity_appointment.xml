@@ -1,69 +1,150 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212">
+    android:background="#F5F7FA">
 
-    <LinearLayout
+    <!-- Top Header -->
+    <View
+        android:id="@+id/topHeader"
         android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:background="#2196F3"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Back Button -->
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_menu_revert"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
+
+    <TextView
+        android:id="@+id/tvHeaderTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:text="Book Appointment"
+        android:textColor="@color/white"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnBack" />
 
-        <TextView
-            android:layout_width="wrap_content"
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Schedule your visit to Gleneagles"
+        android:textColor="#E3F2FD"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@+id/tvHeaderTitle"
+        app:layout_constraintTop_toBottomOf="@+id/tvHeaderTitle" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="-40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topHeader">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Book Appointment"
-            android:textColor="#FFFFFF"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="30dp"/>
+            android:layout_margin="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp">
 
-        <Spinner
-            android:id="@+id/spinnerSpecialty"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:layout_marginBottom="15dp"
-            android:background="@drawable/edittext_style"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
 
-        <Spinner
-            android:id="@+id/spinnerDoctor"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:layout_marginBottom="15dp"
-            android:background="@drawable/edittext_style"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Specialty"
+                    android:textColor="#333333"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
 
-        <EditText
-            android:id="@+id/etDate"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:hint="Appointment Date"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#B0B0B0"
-            android:background="@drawable/edittext_style"
-            android:padding="15dp"
-            android:layout_marginBottom="15dp"/>
+                <Spinner
+                    android:id="@+id/spinnerSpecialty"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:layout_marginBottom="20dp"
+                    android:background="@drawable/edittext_rounded"/>
 
-        <EditText
-            android:id="@+id/etTime"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:hint="Appointment Time"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#B0B0B0"
-            android:background="@drawable/edittext_style"
-            android:padding="15dp"
-            android:layout_marginBottom="30dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Doctor"
+                    android:textColor="#333333"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
 
-        <Button
-            android:id="@+id/btnBookAppointment"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Book Appointment"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:background="@drawable/button_blue"/>
+                <Spinner
+                    android:id="@+id/spinnerDoctor"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:layout_marginBottom="20dp"
+                    android:background="@drawable/edittext_rounded"/>
 
-    </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Date"
+                    android:textColor="#333333"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
 
-</ScrollView>
+                <EditText
+                    android:id="@+id/etDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:hint="Select Date"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:textColor="#333333"
+                    android:background="@drawable/edittext_rounded"
+                    android:padding="15dp"
+                    android:layout_marginBottom="20dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Time"
+                    android:textColor="#333333"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
+
+                <Spinner
+                    android:id="@+id/spinnerTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:layout_marginBottom="30dp"
+                    android:background="@drawable/edittext_rounded"/>
+
+                <Button
+                    android:id="@+id/btnBookAppointment"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="CONFIRM BOOKING"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:background="@drawable/button_gradient"/>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

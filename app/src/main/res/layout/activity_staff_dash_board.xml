@@ -13,32 +13,68 @@
         android:background="#00796B"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_menu_revert"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white"
+        android:clickable="true"
+        android:focusable="true"/>
+
+    <ImageView
+        android:id="@+id/btnMenu"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="16dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_more_vert"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"/>
+
     <TextView
         android:id="@+id/tvStaffTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:text="Staff Portal"
         android:textColor="@color/white"
         android:textSize="28sp"
         android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/btnMenu"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/btnBack" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/tvSubtitle"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Clinic Operations Dashboard"
         android:textColor="#E0E0E0"
         android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/tvStaffTitle"
         app:layout_constraintStart_toStartOf="@+id/tvStaffTitle"
         app:layout_constraintTop_toBottomOf="@+id/tvStaffTitle" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="-60dp"
+        android:layout_marginTop="-40dp"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/topHeader">
 
@@ -47,13 +83,13 @@
             android:layout_height="wrap_content"
             android:alignmentMode="alignMargins"
             android:columnCount="2"
-            android:padding="16dp">
+            android:padding="8dp">
 
-            <!-- Call Queue -->
+            <!-- View Patient Queue -->
             <androidx.cardview.widget.CardView
-                android:id="@+id/btnCallQueue"
+                android:id="@+id/btnViewQueue"
                 android:layout_width="0dp"
-                android:layout_height="160dp"
+                android:layout_height="150dp"
                 android:layout_columnWeight="1"
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
@@ -64,28 +100,32 @@
                     android:layout_height="match_parent"
                     android:background="#26A69A"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
                     <ImageView
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:src="@android:drawable/ic_btn_speak_now"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:src="@android:drawable/ic_menu_view"
                         app:tint="@color/white" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="Call Queue"
+                        android:layout_marginTop="8dp"
+                        android:text="View Queue"
+                        android:textAlignment="center"
                         android:textColor="@color/white"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Appointments -->
+            <!-- Call Patient Queue -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/btnCallQueue"
                 android:layout_width="0dp"
-                android:layout_height="160dp"
+                android:layout_height="150dp"
                 android:layout_columnWeight="1"
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
@@ -94,30 +134,34 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#42A5F5"
+                    android:background="#009688"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
                     <ImageView
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:src="@android:drawable/ic_menu_today"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:src="@android:drawable/ic_btn_speak_now"
                         app:tint="@color/white" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="Daily Schedule"
+                        android:layout_marginTop="8dp"
+                        android:text="Call Queue"
+                        android:textAlignment="center"
                         android:textColor="@color/white"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Patient Records -->
+            <!-- Manage Patient Records -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/btnPatientRecords"
                 android:layout_width="0dp"
-                android:layout_height="160dp"
+                android:layout_height="150dp"
                 android:layout_columnWeight="1"
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
@@ -128,28 +172,32 @@
                     android:layout_height="match_parent"
                     android:background="#66BB6A"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
                     <ImageView
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
                         android:src="@android:drawable/ic_menu_agenda"
                         app:tint="@color/white" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="Patients"
+                        android:layout_marginTop="8dp"
+                        android:text="Patient Records"
+                        android:textAlignment="center"
                         android:textColor="@color/white"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Profile -->
+            <!-- Manage Appointment Details -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/btnAppointments"
                 android:layout_width="0dp"
-                android:layout_height="160dp"
+                android:layout_height="150dp"
                 android:layout_columnWeight="1"
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
@@ -158,22 +206,25 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#AB47BC"
+                    android:background="#42A5F5"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
                     <ImageView
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:src="@android:drawable/ic_menu_myplaces"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:src="@android:drawable/ic_menu_today"
                         app:tint="@color/white" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="Profile"
+                        android:layout_marginTop="8dp"
+                        android:text="Appointments"
+                        android:textAlignment="center"
                         android:textColor="@color/white"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

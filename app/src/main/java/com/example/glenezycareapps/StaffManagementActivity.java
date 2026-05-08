@@ -1,3 +1,7 @@
+// ==============================
+// StaffManagementActivity.java
+// ==============================
+
 package com.example.glenezycareapps;
 
 import android.os.Bundle;
@@ -7,16 +11,21 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
+
 public class StaffManagementActivity extends AppCompatActivity {
 
     EditText etStaffName,
             etStaffEmail,
             etStaffRole;
 
-    Button btnAddStaff,
-            btnViewStaff,
-            btnEditStaff,
-            btnDeleteStaff;
+    Button btnAddStaff;
+    android.widget.ImageView btnBack;
+
+    DatabaseReference staffRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,44 +37,37 @@ public class StaffManagementActivity extends AppCompatActivity {
         etStaffRole = findViewById(R.id.etStaffRole);
 
         btnAddStaff = findViewById(R.id.btnAddStaff);
-        btnViewStaff = findViewById(R.id.btnViewStaff);
-        btnEditStaff = findViewById(R.id.btnEditStaff);
-        btnDeleteStaff = findViewById(R.id.btnDeleteStaff);
+        btnBack = findViewById(R.id.btnBack);
 
-        btnAddStaff.setOnClickListener(v -> {
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
 
-            String name = etStaffName.getText().toString();
-            String email = etStaffEmail.getText().toString();
-            String role = etStaffRole.getText().toString();
+        staffRef = FirebaseDatabase
+                .getInstance()
+                .getReference("staff");
 
-            Toast.makeText(this,
-                    "Staff Added Successfully",
-                    Toast.LENGTH_SHORT).show();
+        btnAddStaff.setOnClickListener(v -> addStaff());
+    }
 
-        });
+    private void addStaff() {
 
-        btnViewStaff.setOnClickListener(v -> {
+        HashMap<String, String> staffMap =
+                new HashMap<>();
 
-            Toast.makeText(this,
-                    "Viewing Staff Records",
-                    Toast.LENGTH_SHORT).show();
+        staffMap.put("fullName",
+                etStaffName.getText().toString());
 
-        });
+        staffMap.put("email",
+                etStaffEmail.getText().toString());
 
-        btnEditStaff.setOnClickListener(v -> {
+        staffMap.put("role",
+                etStaffRole.getText().toString());
 
-            Toast.makeText(this,
-                    "Staff Record Updated",
-                    Toast.LENGTH_SHORT).show();
+        staffRef.push().setValue(staffMap);
 
-        });
-
-        btnDeleteStaff.setOnClickListener(v -> {
-
-            Toast.makeText(this,
-                    "Staff Record Deleted",
-                    Toast.LENGTH_SHORT).show();
-
-        });
+        Toast.makeText(this,
+                "Staff Added Successfully",
+                Toast.LENGTH_SHORT).show();
     }
 }

@@ -1,97 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212">
+    android:background="#F5F7FA">
 
-    <LinearLayout
+    <!-- Top Header -->
+    <View
+        android:id="@+id/topHeader"
         android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:background="@color/primary_blue"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Back Button -->
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_menu_revert"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
+
+    <TextView
+        android:id="@+id/tvHeaderTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:text="Staff Management"
+        android:textColor="@color/white"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnBack" />
 
-        <TextView
-            android:layout_width="wrap_content"
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Manage clinic staff accounts"
+        android:textColor="#E3F2FD"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@+id/tvHeaderTitle"
+        app:layout_constraintTop_toBottomOf="@+id/tvHeaderTitle" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="-40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topHeader">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Staff Management"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="25dp"/>
+            android:layout_margin="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp">
 
-        <EditText
-            android:id="@+id/etStaffName"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:hint="Staff Name"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#B0B0B0"
-            android:background="@drawable/edittext_style"
-            android:padding="15dp"
-            android:layout_marginBottom="15dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
 
-        <EditText
-            android:id="@+id/etStaffEmail"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:hint="Staff Email"
-            android:inputType="textEmailAddress"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#B0B0B0"
-            android:background="@drawable/edittext_style"
-            android:padding="15dp"
-            android:layout_marginBottom="15dp"/>
+                <EditText
+                    android:id="@+id/etStaffName"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:background="@drawable/edittext_rounded"
+                    android:hint="Staff Name"
+                    android:padding="15dp"
+                    android:layout_marginBottom="16dp"
+                    android:textColor="#333333"/>
 
-        <EditText
-            android:id="@+id/etStaffRole"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:hint="Staff Role"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#B0B0B0"
-            android:background="@drawable/edittext_style"
-            android:padding="15dp"
-            android:layout_marginBottom="25dp"/>
+                <EditText
+                    android:id="@+id/etStaffEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:background="@drawable/edittext_rounded"
+                    android:hint="Staff Email"
+                    android:padding="15dp"
+                    android:layout_marginBottom="16dp"
+                    android:inputType="textEmailAddress"
+                    android:textColor="#333333"/>
 
-        <Button
-            android:id="@+id/btnAddStaff"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Add Staff"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:background="@drawable/button_blue"
-            android:layout_marginBottom="15dp"/>
+                <EditText
+                    android:id="@+id/etStaffRole"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:background="@drawable/edittext_rounded"
+                    android:hint="Staff Role"
+                    android:padding="15dp"
+                    android:layout_marginBottom="24dp"
+                    android:textColor="#333333"/>
 
-        <Button
-            android:id="@+id/btnViewStaff"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="View Staff"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:background="@drawable/button_blue"
-            android:layout_marginBottom="15dp"/>
+                <Button
+                    android:id="@+id/btnAddStaff"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="ADD STAFF"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:background="@drawable/button_gradient"
+                    android:layout_marginBottom="16dp"/>
 
-        <Button
-            android:id="@+id/btnEditStaff"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Edit Staff"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:background="@drawable/button_blue"
-            android:layout_marginBottom="15dp"/>
+                <Button
+                    android:id="@+id/btnViewStaff"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="VIEW STAFF LIST"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:background="@drawable/button_outline"
+                    android:layout_marginBottom="16dp"/>
 
-        <Button
-            android:id="@+id/btnDeleteStaff"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Delete Staff"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:backgroundTint="#F44336"/>
+                <Button
+                    android:id="@+id/btnDeleteStaff"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="DELETE STAFF"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:backgroundTint="#EF5350"/>
 
-    </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </androidx.core.widget.NestedScrollView>
 
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

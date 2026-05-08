@@ -1,10 +1,13 @@
+// ==============================
+// RegisterActivity.java
+// ==============================
+
 package com.example.glenezycareapps;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,9 +20,8 @@ import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    EditText etName, etEmail, etPassword;
+    EditText etName, etEmail, etPassword, etRoleCode;
     Button btnRegister;
-    TextView tvLogin;
 
     FirebaseAuth mAuth;
     DatabaseReference databaseReference;
@@ -32,19 +34,19 @@ public class RegisterActivity extends AppCompatActivity {
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
+        etRoleCode = findViewById(R.id.etRoleCode);
 
         btnRegister = findViewById(R.id.btnRegister);
-        tvLogin = findViewById(R.id.tvLogin);
 
         mAuth = FirebaseAuth.getInstance();
 
-        databaseReference =
-                FirebaseDatabase.getInstance()
-                        .getReference("users");
+        databaseReference = FirebaseDatabase
+                .getInstance()
+                .getReference("users");
 
         btnRegister.setOnClickListener(v -> registerUser());
-
-        tvLogin.setOnClickListener(v -> {
+        
+        findViewById(R.id.tvLogin).setOnClickListener(v -> {
             startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
             finish();
         });
@@ -55,6 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
         String name = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
+        String roleCode = etRoleCode.getText().toString().trim();
 
         if(name.isEmpty() || email.isEmpty() || password.isEmpty()) {
 
@@ -78,23 +81,30 @@ public class RegisterActivity extends AppCompatActivity {
 
                         userMap.put("fullName", name);
                         userMap.put("email", email);
-                        userMap.put("role", "patient");
+                        
+                        // Role logic based on secret code
+                        String role = "patient"; // Default
+                        if (roleCode.equals("ADMIN123")) {
+                            role = "admin";
+                        } else if (roleCode.equals("STAFF123")) {
+                            role = "staff";
+                        }
+                        
+                        userMap.put("role", role);
+                        String finalRole = role;
 
                         databaseReference.child(userId)
-                                .setValue(userMap)
-                                .addOnCompleteListener(task1 -> {
+                                .setValue(userMap);
 
-                                    Toast.makeText(this,
-                                            "Registration Successful",
-                                            Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this,
+                                "Registration Successful as " + finalRole,
+                                Toast.LENGTH_SHORT).show();
 
-                                    startActivity(new Intent(
-                                            RegisterActivity.this,
-                                            LoginActivity.class));
+                        startActivity(new Intent(
+                                RegisterActivity.this,
+                                LoginActivity.class));
 
-                                    finish();
-
-                                });
+                        finish();
 
                     } else {
 

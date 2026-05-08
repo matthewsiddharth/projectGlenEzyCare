@@ -15,6 +15,15 @@
             android:name=".StaffManagementActivity"
             android:exported="false" />
         <activity
+            android:name=".PatientRecordsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AppointmentManagementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AppointmentHistoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".AdminDashboardActivity"
             android:exported="false" />
         <activity

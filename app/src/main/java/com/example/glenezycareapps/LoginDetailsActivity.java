@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,6 +23,7 @@ public class LoginDetailsActivity extends AppCompatActivity {
 
     EditText etEmail, etPassword;
     Button btnLogin;
+    TextView tvForgotPassword;
     FirebaseAuth mAuth;
     DatabaseReference databaseReference;
     ProgressDialog progressDialog;
@@ -34,15 +36,34 @@ public class LoginDetailsActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
         mAuth = FirebaseAuth.getInstance();
-        databaseReference = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
-                .getReference("users");
+        databaseReference = FirebaseDatabase.getInstance().getReference("users");
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Logging in...");
 
         btnLogin.setOnClickListener(v -> loginUser());
+        tvForgotPassword.setOnClickListener(v -> resetPassword());
+    }
+
+    private void resetPassword() {
+        String email = etEmail.getText().toString().trim();
+
+        if (email.isEmpty()) {
+            Toast.makeText(this, "Please enter your email to reset password", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        mAuth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(this, "Password reset email sent to " + email, Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(this, "Error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 
     private void loginUser() {
@@ -67,34 +88,45 @@ public class LoginDetailsActivity extends AppCompatActivity {
     }
 
     private void checkUserRole(String userId) {
+        Log.d("LoginDebug", "Checking role for UID: " + userId);
         databaseReference.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                progressDialog.dismiss();
                 if (snapshot.exists()) {
                     String role = snapshot.child("role").getValue(String.class);
+                    Log.d("LoginDebug", "User data found. Role: " + role);
+                    
                     Intent intent = null;
                     if (role != null) {
-                        if (role.equalsIgnoreCase("admin")) {
+                        String cleanRole = role.trim().toLowerCase();
+                        if (cleanRole.equals("admin")) {
                             intent = new Intent(LoginDetailsActivity.this, AdminDashboardActivity.class);
-                        } else if (role.equalsIgnoreCase("staff")) {
+                        } else if (cleanRole.equals("staff")) {
                             intent = new Intent(LoginDetailsActivity.this, StaffDashboardActivity.class);
-                        } else if (role.equalsIgnoreCase("patient")) {
+                        } else if (cleanRole.equals("patient")) {
                             intent = new Intent(LoginDetailsActivity.this, PatientHomeActivity.class);
                         }
                     }
 
                     if (intent != null) {
                         startActivity(intent);
-                        finishAffinity();
+                        finish();
                     } else {
-                        Toast.makeText(LoginDetailsActivity.this, "Unknown role", Toast.LENGTH_SHORT).show();
+                        Log.e("LoginDebug", "Role not recognized: " + role);
+                        Toast.makeText(LoginDetailsActivity.this, "Error: Unknown role (" + role + ")", Toast.LENGTH_LONG).show();
                     }
+                } else {
+                    Log.e("LoginDebug", "No user data found in database for UID: " + userId);
+                    Toast.makeText(LoginDetailsActivity.this, "User data not found in database.", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(LoginDetailsActivity.this, "Database Error", Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+                Log.e("LoginDebug", "Database error: " + error.getMessage());
+                Toast.makeText(LoginDetailsActivity.this, "Database Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }

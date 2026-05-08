@@ -1,61 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212">
+    android:background="#F5F7FA">
 
-    <LinearLayout
+    <!-- Top Header -->
+    <View
+        android:id="@+id/topHeader"
         android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:background="#00796B"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Back Button -->
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_menu_revert"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
+
+    <TextView
+        android:id="@+id/tvHeaderTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp"
-        android:gravity="center_horizontal">
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:text="Call Queue"
+        android:textColor="@color/white"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnBack" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Queue Calling System"
-            android:textColor="#FFFFFF"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="30dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Manage patient flow and calling"
+        android:textColor="#E0F2F1"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@+id/tvHeaderTitle"
+        app:layout_constraintTop_toBottomOf="@+id/tvHeaderTitle" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Current Queue"
-            android:textColor="#B0B0B0"
-            android:textSize="18sp"/>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="-40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topHeader">
 
-        <TextView
-            android:id="@+id/tvCurrentQueue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Q001"
-            android:textColor="#42A5F5"
-            android:textSize="60sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="40dp"/>
-
-        <Button
-            android:id="@+id/btnCallNext"
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Call Next Queue"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:background="@drawable/button_blue"
-            android:layout_marginBottom="15dp"/>
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp">
 
-        <Button
-            android:id="@+id/btnCompleteQueue"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Complete Current Queue"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:backgroundTint="#4CAF50"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="32dp"
+                android:gravity="center_horizontal">
 
-    </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Currently Calling"
+                    android:textColor="#757575"
+                    android:textSize="18sp"/>
 
-</ScrollView>
+                <TextView
+                    android:id="@+id/tvCurrentQueue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Q001"
+                    android:textColor="#009688"
+                    android:textSize="72sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="40dp"/>
+
+                <Button
+                    android:id="@+id/btnCallNext"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="CALL NEXT PATIENT"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:background="@drawable/button_gradient"
+                    android:layout_marginBottom="16dp"/>
+
+                <Button
+                    android:id="@+id/btnCompleteQueue"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="COMPLETE SESSION"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:background="@drawable/button_outline"/>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

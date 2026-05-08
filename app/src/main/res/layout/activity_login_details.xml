@@ -38,6 +38,8 @@
             android:layout_height="55dp"
             android:background="@drawable/edittext_style"
             android:hint="Email"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/hint"
             android:padding="15dp"
             android:layout_marginBottom="16dp"/>
 
@@ -47,6 +49,8 @@
             android:layout_height="55dp"
             android:background="@drawable/edittext_style"
             android:hint="Password"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/hint"
             android:inputType="textPassword"
             android:padding="15dp"
             android:layout_marginBottom="8dp"/>
