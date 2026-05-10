@@ -41,7 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         databaseReference = FirebaseDatabase
-                .getInstance()
+                .getInstance("https://glenezycare-apps-default-rtdb.firebaseio.com/")
                 .getReference("users");
 
         btnRegister.setOnClickListener(v -> registerUser());
@@ -61,7 +61,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         if(name.isEmpty() || email.isEmpty() || password.isEmpty()) {
 
-            Toast.makeText(this,
+            Toast.makeText(RegisterActivity.this,
                     "Please fill all fields",
                     Toast.LENGTH_SHORT).show();
 
@@ -73,43 +73,37 @@ public class RegisterActivity extends AppCompatActivity {
 
                     if(task.isSuccessful()) {
 
-                        String userId =
-                                mAuth.getCurrentUser().getUid();
+                        if (mAuth.getCurrentUser() != null) {
+                            String userId = mAuth.getCurrentUser().getUid();
 
-                        HashMap<String, String> userMap =
-                                new HashMap<>();
+                            HashMap<String, String> userMap = new HashMap<>();
+                            userMap.put("fullName", name);
+                            userMap.put("email", email);
 
-                        userMap.put("fullName", name);
-                        userMap.put("email", email);
-                        
-                        // Role logic based on secret code
-                        String role = "patient"; // Default
-                        if (roleCode.equals("ADMIN123")) {
-                            role = "admin";
-                        } else if (roleCode.equals("STAFF123")) {
-                            role = "staff";
+                            // Role logic based on secret code
+                            String role = "patient"; // Default
+                            if (roleCode.equals("ADMIN123")) {
+                                role = "admin";
+                            } else if (roleCode.equals("STAFF123")) {
+                                role = "staff";
+                            }
+
+                            userMap.put("role", role);
+                            String finalRole = role;
+
+                            databaseReference.child(userId).setValue(userMap);
+
+                            Toast.makeText(RegisterActivity.this,
+                                    "Registration Successful as " + finalRole,
+                                    Toast.LENGTH_SHORT).show();
+
+                            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                            finish();
                         }
-                        
-                        userMap.put("role", role);
-                        String finalRole = role;
-
-                        databaseReference.child(userId)
-                                .setValue(userMap);
-
-                        Toast.makeText(this,
-                                "Registration Successful as " + finalRole,
-                                Toast.LENGTH_SHORT).show();
-
-                        startActivity(new Intent(
-                                RegisterActivity.this,
-                                LoginActivity.class));
-
-                        finish();
 
                     } else {
-
-                        Toast.makeText(this,
-                                task.getException().getMessage(),
+                        Toast.makeText(RegisterActivity.this,
+                                task.getException() != null ? task.getException().getMessage() : "Registration failed",
                                 Toast.LENGTH_LONG).show();
                     }
 

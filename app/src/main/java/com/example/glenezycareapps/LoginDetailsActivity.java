@@ -39,9 +39,10 @@ public class LoginDetailsActivity extends AppCompatActivity {
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
         mAuth = FirebaseAuth.getInstance();
-        databaseReference = FirebaseDatabase.getInstance().getReference("users");
+        // Manually specifying the URL because it's missing in google-services.json
+        databaseReference = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.firebaseio.com/").getReference("users");
 
-        progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(LoginDetailsActivity.this);
         progressDialog.setMessage("Logging in...");
 
         btnLogin.setOnClickListener(v -> loginUser());
@@ -52,7 +53,7 @@ public class LoginDetailsActivity extends AppCompatActivity {
         String email = etEmail.getText().toString().trim();
 
         if (email.isEmpty()) {
-            Toast.makeText(this, "Please enter your email to reset password", Toast.LENGTH_LONG).show();
+            Toast.makeText(LoginDetailsActivity.this, "Please enter your email to reset password", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -71,7 +72,7 @@ public class LoginDetailsActivity extends AppCompatActivity {
         String password = etPassword.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginDetailsActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -80,9 +81,11 @@ public class LoginDetailsActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     progressDialog.dismiss();
                     if (task.isSuccessful()) {
-                        checkUserRole(mAuth.getCurrentUser().getUid());
+                        if (mAuth.getCurrentUser() != null) {
+                            checkUserRole(mAuth.getCurrentUser().getUid());
+                        }
                     } else {
-                        Toast.makeText(this, "Login Failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginDetailsActivity.this, "Login Failed: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
