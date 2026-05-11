@@ -3,98 +3,203 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@drawable/doctor">
 
-    <!-- Top Gradient Header -->
+    <!-- Dark Overlay for background readability -->
     <View
-        android:id="@+id/headerBackground"
         android:layout_width="match_parent"
-        android:layout_height="320dp"
-        android:background="@drawable/login_header_gradient"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent"
+        android:background="#88000000" />
 
-    <!-- Logo and Name -->
-    <ImageView
-        android:id="@+id/ivLogo"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="80dp"
-        android:src="@drawable/logo"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tvAppName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="GlenEzyCare"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ivLogo" />
-
-    <!-- Welcome Text -->
-    <TextView
-        android:id="@+id/tvWelcomeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:text="Welcome !"
-        android:textColor="#555555"
-        android:textSize="28sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/headerBackground" />
-
-    <!-- Buttons -->
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnRegisterNav"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="40dp"
-        android:background="@drawable/button_gradient"
-        android:text="Create Account"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@+id/tvWelcomeText" />
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnLoginNav"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="40dp"
-        android:background="@drawable/button_outline"
-        android:text="Login"
-        android:textAllCaps="false"
-        android:textColor="#42A5F5"
-        android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@+id/btnRegisterNav" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <!-- Social Icons Placeholder -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+            <!-- Top Header Section -->
+            <LinearLayout
+                android:id="@+id/headerLayout"
+                android:layout_width="404dp"
+                android:layout_height="300dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingTop="50dp"
+                android:paddingBottom="30dp"
+                app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"/>
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:src="@drawable/logo" />
 
-    </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="GlenEzyCare"
+                    android:textColor="@color/white"
+                    android:textSize="32sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.1"
+                    android:text="QUEUE SMART. CARE EASY."
+                    android:textColor="#E0E0E0"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="GLENEAGLES HOSPITAL"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <!-- Bottom Login Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="20dp"
+                app:cardCornerRadius="30dp"
+                app:cardElevation="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/headerLayout">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="438dp"
+                    android:orientation="vertical"
+                    android:padding="32dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="Welcome Back"
+                        android:textColor="@color/brand_primary"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="4dp"
+                        android:text="Your health, our priority."
+                        android:textColor="#999999"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/etEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="55dp"
+                        android:layout_marginTop="32dp"
+                        android:background="@drawable/edittext_style"
+                        android:drawableStart="@android:drawable/ic_dialog_email"
+                        android:drawablePadding="12dp"
+                        android:hint="Email Address"
+                        android:inputType="textEmailAddress"
+                        android:padding="15dp"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@color/hint" />
+
+                    <EditText
+                        android:id="@+id/etPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="55dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/edittext_style"
+                        android:drawableStart="@android:drawable/ic_lock_idle_lock"
+                        android:drawablePadding="12dp"
+                        android:hint="Password"
+                        android:inputType="textPassword"
+                        android:padding="15dp"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@color/hint" />
+
+                    <TextView
+                        android:id="@+id/tvForgotPassword"
+                        android:layout_width="125dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="12dp"
+                        android:text="Forgot Password?"
+                        android:textColor="@color/brand_primary"
+                        android:textStyle="bold" />
+
+                    <!-- Staff/Admin Toggle -->
+
+                    <LinearLayout
+                        android:layout_width="344dp"
+                        android:layout_height="26dp"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="332dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Login as Staff/Admin"
+                            android:textColor="#333333"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchRole"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btnLogin"
+                        android:layout_width="348dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:background="@drawable/button_gradient"
+                        android:text="Sign In"
+                        android:textAllCaps="false"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="32dp"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Don't have an account? "
+                            android:textColor="#999999" />
+
+                        <TextView
+                            android:id="@+id/tvRegister"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sign Up"
+                            android:textColor="@color/brand_primary"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

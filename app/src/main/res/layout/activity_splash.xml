@@ -35,14 +35,14 @@
 
         <TextView
             android:id="@+id/tvSlogan"
-            android:layout_width="280dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="appointment booking at specialist clinics in Gleneagles Hospital"
-            android:textColor="#E0E0E0"
-            android:textSize="16sp"
             android:gravity="center"
-            android:alpha="0" />
+            android:text="Book your appointment with us"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 

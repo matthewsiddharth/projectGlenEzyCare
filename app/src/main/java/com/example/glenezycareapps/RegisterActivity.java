@@ -20,7 +20,7 @@ import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    EditText etName, etEmail, etPassword, etRoleCode;
+    EditText etName, etEmail, etPassword;
     Button btnRegister;
 
     FirebaseAuth mAuth;
@@ -34,7 +34,6 @@ public class RegisterActivity extends AppCompatActivity {
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
-        etRoleCode = findViewById(R.id.etRoleCode);
 
         btnRegister = findViewById(R.id.btnRegister);
 
@@ -57,7 +56,6 @@ public class RegisterActivity extends AppCompatActivity {
         String name = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
-        String roleCode = etRoleCode.getText().toString().trim();
 
         if(name.isEmpty() || email.isEmpty() || password.isEmpty()) {
 
@@ -79,22 +77,12 @@ public class RegisterActivity extends AppCompatActivity {
                             HashMap<String, String> userMap = new HashMap<>();
                             userMap.put("fullName", name);
                             userMap.put("email", email);
-
-                            // Role logic based on secret code
-                            String role = "patient"; // Default
-                            if (roleCode.equals("ADMIN123")) {
-                                role = "admin";
-                            } else if (roleCode.equals("STAFF123")) {
-                                role = "staff";
-                            }
-
-                            userMap.put("role", role);
-                            String finalRole = role;
+                            userMap.put("role", "patient");
 
                             databaseReference.child(userId).setValue(userMap).addOnCompleteListener(dbTask -> {
                                 if (dbTask.isSuccessful()) {
                                     Toast.makeText(RegisterActivity.this,
-                                            "Registration Successful as " + finalRole,
+                                            "Registration Successful",
                                             Toast.LENGTH_SHORT).show();
 
                                     startActivity(new Intent(RegisterActivity.this, LoginActivity.class));

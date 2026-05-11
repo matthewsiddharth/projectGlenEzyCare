@@ -4,8 +4,20 @@
     <color name="background_dark">#121212</color>
     <color name="card_dark">#1E1E1E</color>
 
+    <!-- Role Themes (Unique & Modern) -->
+    <color name="patient_primary">#1976D2</color> <!-- Trust Blue -->
+    <color name="patient_secondary">#1565C0</color>
+
+    <color name="staff_primary">#00695C</color> <!-- Clinical Teal -->
+    <color name="staff_secondary">#004D40</color>
+
+    <color name="admin_primary">#303F9F</color> <!-- Admin Indigo -->
+    <color name="admin_secondary">#1A237E</color>
+
+    <!-- Brand Colors -->
+    <color name="brand_primary">#1976D2</color>
     <color name="primary_blue">#1976D2</color>
-    <color name="light_blue">#42A5F5</color>
+    <color name="light_blue">#E3F2FD</color>
 
     <color name="white">#FFFFFF</color>
     <color name="hint">#B0B0B0</color>

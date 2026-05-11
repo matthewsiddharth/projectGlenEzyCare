@@ -78,19 +78,8 @@
                 android:background="@drawable/edittext_rounded"
                 android:hint="Password"
                 android:padding="15dp"
-                android:layout_marginBottom="16dp"
-                android:inputType="textPassword"
-                android:textColor="#333333"/>
-
-            <EditText
-                android:id="@+id/etRoleCode"
-                android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:background="@drawable/edittext_rounded"
-                android:hint="Role Code (admin/staff)"
-                android:padding="15dp"
                 android:layout_marginBottom="32dp"
-                android:inputType="text"
+                android:inputType="textPassword"
                 android:textColor="#333333"/>
 
             <androidx.appcompat.widget.AppCompatButton

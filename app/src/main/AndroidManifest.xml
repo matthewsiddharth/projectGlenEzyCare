@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GlenEzyCareApps">
         <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
             android:name=".ChangePasswordActivity"
             android:exported="false" />
         <activity
