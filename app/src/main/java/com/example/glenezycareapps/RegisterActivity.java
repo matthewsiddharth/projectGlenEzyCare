@@ -41,7 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         databaseReference = FirebaseDatabase
-                .getInstance("https://glenezycare-apps-default-rtdb.firebaseio.com/")
+                .getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
                 .getReference("users");
 
         btnRegister.setOnClickListener(v -> registerUser());
@@ -91,16 +91,21 @@ public class RegisterActivity extends AppCompatActivity {
                             userMap.put("role", role);
                             String finalRole = role;
 
-                            databaseReference.child(userId).setValue(userMap);
+                            databaseReference.child(userId).setValue(userMap).addOnCompleteListener(dbTask -> {
+                                if (dbTask.isSuccessful()) {
+                                    Toast.makeText(RegisterActivity.this,
+                                            "Registration Successful as " + finalRole,
+                                            Toast.LENGTH_SHORT).show();
 
-                            Toast.makeText(RegisterActivity.this,
-                                    "Registration Successful as " + finalRole,
-                                    Toast.LENGTH_SHORT).show();
-
-                            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-                            finish();
+                                    startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                                    finish();
+                                } else {
+                                    Toast.makeText(RegisterActivity.this,
+                                            "Database Error: " + (dbTask.getException() != null ? dbTask.getException().getMessage() : "Failed to save user data"),
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            });
                         }
-
                     } else {
                         Toast.makeText(RegisterActivity.this,
                                 task.getException() != null ? task.getException().getMessage() : "Registration failed",

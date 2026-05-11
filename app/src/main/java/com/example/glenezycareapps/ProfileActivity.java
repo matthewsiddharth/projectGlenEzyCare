@@ -34,7 +34,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ProfileActivity extends AppCompatActivity {
 
     EditText etFullName, etEmail, etPhone;
-    Button btnUpdateProfile;
+    Button btnUpdateProfile, btnChangePassword;
     ImageView btnBack;
     CircleImageView ivProfilePic;
     FloatingActionButton btnEditPic;
@@ -66,6 +66,7 @@ public class ProfileActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.etEmail);
         etPhone = findViewById(R.id.etPhone);
         btnUpdateProfile = findViewById(R.id.btnUpdateProfile);
+        btnChangePassword = findViewById(R.id.btnGoToChangePassword);
         btnBack = findViewById(R.id.btnBack);
         ivProfilePic = findViewById(R.id.ivProfilePic);
         btnEditPic = findViewById(R.id.btnEditPic);
@@ -83,6 +84,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         btnBack.setOnClickListener(v -> onBackPressed());
         btnUpdateProfile.setOnClickListener(v -> updateProfile());
+        btnChangePassword.setOnClickListener(v -> {
+            startActivity(new Intent(ProfileActivity.this, ChangePasswordActivity.class));
+        });
         btnEditPic.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             imagePickerLauncher.launch(intent);

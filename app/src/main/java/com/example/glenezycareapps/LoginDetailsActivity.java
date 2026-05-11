@@ -40,7 +40,7 @@ public class LoginDetailsActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         // Manually specifying the URL because it's missing in google-services.json
-        databaseReference = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.firebaseio.com/").getReference("users");
+        databaseReference = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("users");
 
         progressDialog = new ProgressDialog(LoginDetailsActivity.this);
         progressDialog.setMessage("Logging in...");
@@ -100,16 +100,20 @@ public class LoginDetailsActivity extends AppCompatActivity {
                     String role = snapshot.child("role").getValue(String.class);
                     Log.d("LoginDebug", "User data found. Role: " + role);
                     
+                    // Default to patient if role is missing
+                    if (role == null) {
+                        role = "patient";
+                    }
+
+                    String cleanRole = role.trim().toLowerCase();
                     Intent intent = null;
-                    if (role != null) {
-                        String cleanRole = role.trim().toLowerCase();
-                        if (cleanRole.equals("admin")) {
-                            intent = new Intent(LoginDetailsActivity.this, AdminDashboardActivity.class);
-                        } else if (cleanRole.equals("staff")) {
-                            intent = new Intent(LoginDetailsActivity.this, StaffDashboardActivity.class);
-                        } else if (cleanRole.equals("patient")) {
-                            intent = new Intent(LoginDetailsActivity.this, PatientHomeActivity.class);
-                        }
+
+                    if (cleanRole.equals("admin")) {
+                        intent = new Intent(LoginDetailsActivity.this, AdminDashboardActivity.class);
+                    } else if (cleanRole.equals("staff")) {
+                        intent = new Intent(LoginDetailsActivity.this, StaffDashboardActivity.class);
+                    } else if (cleanRole.equals("patient")) {
+                        intent = new Intent(LoginDetailsActivity.this, PatientHomeActivity.class);
                     }
 
                     if (intent != null) {
