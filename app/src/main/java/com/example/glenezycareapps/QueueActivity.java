@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
 import java.util.HashMap;
@@ -23,6 +24,8 @@ public class QueueActivity extends AppCompatActivity {
     android.widget.ImageView btnBack;
 
     DatabaseReference queueRef;
+    DatabaseReference userRef;
+    FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,15 +42,25 @@ public class QueueActivity extends AppCompatActivity {
 
         btnGenerateQueue = findViewById(R.id.btnGenerateQueue);
 
-        queueRef = FirebaseDatabase.getInstance()
-                .getReference("queue");
+        mAuth = FirebaseAuth.getInstance();
+        queueRef = FirebaseDatabase.getInstance().getReference("queue");
+        
+        if (mAuth.getCurrentUser() != null) {
+            userRef = FirebaseDatabase.getInstance().getReference("users").child(mAuth.getCurrentUser().getUid());
+        }
 
         btnGenerateQueue.setOnClickListener(v -> generateQueue());
     }
 
     private void generateQueue() {
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "Please login to generate a ticket", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        queueRef.child("currentQueue")
+        String userId = mAuth.getCurrentUser().getUid();
+
+        queueRef.child("nextTicketNumber")
                 .addListenerForSingleValueEvent(
                         new ValueEventListener() {
 
@@ -55,47 +68,44 @@ public class QueueActivity extends AppCompatActivity {
                             public void onDataChange(
                                     @NonNull DataSnapshot snapshot) {
 
-                                int currentNumber = 1;
+                                int nextNumber = 1;
 
                                 if(snapshot.exists()) {
-
-                                    currentNumber =
-                                            snapshot.getValue(Integer.class);
+                                    nextNumber = snapshot.getValue(Integer.class);
                                 }
 
-                                String queueNumber =
-                                        "Q" + String.format("%03d",
-                                                currentNumber);
+                                String queueNumber = "Q" + String.format("%03d", nextNumber);
 
                                 tvQueueNumber.setText(queueNumber);
                                 tvQueueStatus.setText("Status: Waiting");
 
-                                HashMap<String, String> queueMap =
-                                        new HashMap<>();
+                                HashMap<String, Object> queueMap = new HashMap<>();
+                                queueMap.put("queueNumber", queueNumber);
+                                queueMap.put("status", "Waiting");
+                                queueMap.put("userId", userId);
+                                queueMap.put("timestamp", ServerValue.TIMESTAMP);
 
-                                queueMap.put("queueNumber",
-                                        queueNumber);
+                                // Push to global tickets
+                                String ticketId = queueRef.child("tickets").push().getKey();
+                                if (ticketId != null) {
+                                    queueRef.child("tickets").child(ticketId).setValue(queueMap);
+                                    
+                                    // Also save a reference to the patient's own profile
+                                    userRef.child("currentTicket").setValue(queueMap);
+                                }
 
-                                queueMap.put("status",
-                                        "Waiting");
-
-                                queueRef.child("tickets")
-                                        .push()
-                                        .setValue(queueMap);
-
-                                queueRef.child("currentQueue")
-                                        .setValue(currentNumber + 1);
+                                queueRef.child("nextTicketNumber").setValue(nextNumber + 1);
 
                                 Toast.makeText(
                                         QueueActivity.this,
-                                        "Queue Ticket Generated",
+                                        "Queue Ticket Generated: " + queueNumber,
                                         Toast.LENGTH_SHORT).show();
                             }
 
                             @Override
                             public void onCancelled(
                                     @NonNull DatabaseError error) {
-
+                                Toast.makeText(QueueActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
     }

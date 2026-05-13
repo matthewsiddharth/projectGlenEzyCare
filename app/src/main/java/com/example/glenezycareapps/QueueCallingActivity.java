@@ -44,7 +44,8 @@ public class QueueCallingActivity extends AppCompatActivity {
         
         if (btnCompleteQueue != null) {
             btnCompleteQueue.setOnClickListener(v -> {
-                queueRef.child("currentQueue").setValue(1);
+                queueRef.child("nextTicketNumber").setValue(1);
+                queueRef.child("nowServing").setValue(0);
                 queueRef.child("tickets").removeValue();
                 android.widget.Toast.makeText(this, "Session Completed. Queue Reset.", android.widget.Toast.LENGTH_SHORT).show();
             });
@@ -55,7 +56,7 @@ public class QueueCallingActivity extends AppCompatActivity {
 
     private void loadCurrentQueue() {
 
-        queueRef.child("currentQueue")
+        queueRef.child("nowServing")
                 .addValueEventListener(
                         new ValueEventListener() {
 
@@ -71,6 +72,8 @@ public class QueueCallingActivity extends AppCompatActivity {
                                     tvCurrentQueue.setText(
                                             "Q" + String.format("%03d",
                                                     current));
+                                } else {
+                                    tvCurrentQueue.setText("Q000");
                                 }
                             }
 
@@ -83,19 +86,20 @@ public class QueueCallingActivity extends AppCompatActivity {
     }
 
     private void callNextQueue() {
-        queueRef.child("currentQueue")
+        queueRef.child("nowServing")
                 .get()
                 .addOnCompleteListener(task -> {
+                    int currentServing = 0;
                     if (task.isSuccessful() && task.getResult().exists()) {
-                        Integer current = task.getResult().getValue(Integer.class);
-                        if (current != null) {
-                            queueRef.child("currentQueue").setValue(current + 1);
-                            android.widget.Toast.makeText(this, "Calling Next: Q" + String.format("%03d", current + 1), android.widget.Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        // If it doesn't exist yet, start at 1
-                        queueRef.child("currentQueue").setValue(1);
+                        Integer val = task.getResult().getValue(Integer.class);
+                        if (val != null) currentServing = val;
                     }
+                    
+                    int nextToServe = currentServing + 1;
+                    
+                    // Optional: Check if nextToServe actually exists in tickets or hasn't exceeded nextTicketNumber
+                    queueRef.child("nowServing").setValue(nextToServe);
+                    android.widget.Toast.makeText(this, "Calling: Q" + String.format("%03d", nextToServe), android.widget.Toast.LENGTH_SHORT).show();
                 });
     }
 }
