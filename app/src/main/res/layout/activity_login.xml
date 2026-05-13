@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/doctor">
@@ -18,22 +19,25 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingBottom="40dp">
 
             <!-- Top Header Section -->
             <LinearLayout
                 android:id="@+id/headerLayout"
-                android:layout_width="404dp"
-                android:layout_height="300dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingTop="50dp"
-                android:paddingBottom="30dp"
+                android:paddingTop="60dp"
+                android:paddingBottom="40dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:src="@drawable/logo" />
 
                 <TextView
@@ -66,17 +70,22 @@
 
             <!-- Bottom Login Card -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardLogin"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="20dp"
                 app:cardCornerRadius="30dp"
-                app:cardElevation="0dp"
+                app:cardElevation="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/headerLayout">
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/headerLayout"
+                app:layout_constraintVertical_bias="0.0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="438dp"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="32dp">
 
@@ -128,25 +137,25 @@
 
                     <TextView
                         android:id="@+id/tvForgotPassword"
-                        android:layout_width="125dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
                         android:layout_marginTop="12dp"
+                        android:padding="4dp"
                         android:text="Forgot Password?"
                         android:textColor="@color/brand_primary"
                         android:textStyle="bold" />
 
                     <!-- Staff/Admin Toggle -->
-
                     <LinearLayout
-                        android:layout_width="344dp"
-                        android:layout_height="26dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
                         <TextView
-                            android:layout_width="332dp"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Login as Staff/Admin"
@@ -162,22 +171,22 @@
 
                     <Button
                         android:id="@+id/btnLogin"
-                        android:layout_width="348dp"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
                         android:layout_marginTop="24dp"
                         android:background="@drawable/button_gradient"
                         android:text="Sign In"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
                         android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:backgroundTint="@null" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginTop="32dp"
-                        android:layout_marginBottom="20dp"
+                        android:layout_marginTop="24dp"
                         android:orientation="horizontal">
 
                         <TextView
@@ -190,6 +199,7 @@
                             android:id="@+id/tvRegister"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:padding="4dp"
                             android:text="Sign Up"
                             android:textColor="@color/brand_primary"
                             android:textStyle="bold" />
