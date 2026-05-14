@@ -15,7 +15,7 @@ import com.google.firebase.auth.FirebaseAuth;
 public class StaffDashboardActivity extends AppCompatActivity {
 
     CardView btnViewQueue, btnCallQueue, btnPatientRecords, btnAppointments;
-    ImageView btnMenu, btnBack;
+    ImageView btnMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,9 +27,7 @@ public class StaffDashboardActivity extends AppCompatActivity {
         btnPatientRecords = findViewById(R.id.btnPatientRecords);
         btnAppointments = findViewById(R.id.btnAppointments);
         btnMenu = findViewById(R.id.btnMenu);
-        btnBack = findViewById(R.id.btnBack);
 
-        btnBack.setOnClickListener(v -> finish());
         btnMenu.setOnClickListener(this::showPopupMenu);
 
         btnViewQueue.setOnClickListener(v -> {

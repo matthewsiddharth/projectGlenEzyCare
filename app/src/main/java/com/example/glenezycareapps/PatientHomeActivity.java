@@ -16,7 +16,7 @@ public class PatientHomeActivity extends AppCompatActivity {
 
     View btnQueue, btnQueueStatus,
             btnAppointment, btnHistory;
-    ImageView btnMenu, btnBack;
+    ImageView btnMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +28,7 @@ public class PatientHomeActivity extends AppCompatActivity {
         btnAppointment = findViewById(R.id.btnAppointment);
         btnHistory = findViewById(R.id.btnHistory);
         btnMenu = findViewById(R.id.btnMenu);
-        btnBack = findViewById(R.id.btnBack);
 
-        btnBack.setOnClickListener(v -> finish());
         btnMenu.setOnClickListener(this::showPopupMenu);
 
         btnQueue.setOnClickListener(v -> {

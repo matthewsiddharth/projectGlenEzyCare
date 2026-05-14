@@ -98,27 +98,22 @@ public class LoginActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 if (snapshot.exists()) {
                     String role = snapshot.child("role").getValue(String.class);
-                    if (role == null) role = "patient";
+                    // Default to patient if role is missing
+                    if (role == null) {
+                        role = "patient";
+                    }
 
                     String cleanRole = role.trim().toLowerCase();
-                    boolean isAdminStaffMode = switchRole.isChecked();
+                    Log.d("LoginDebug", "Detected role: " + cleanRole);
                     
                     Intent intent = null;
-
-                    if (isAdminStaffMode) {
-                        if (cleanRole.equals("admin")) {
-                            intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
-                        } else if (cleanRole.equals("staff")) {
-                            intent = new Intent(LoginActivity.this, StaffDashboardActivity.class);
-                        } else {
-                            Toast.makeText(LoginActivity.this, "Access Denied: You are not an Admin/Staff member.", Toast.LENGTH_LONG).show();
-                        }
+                    if (cleanRole.equals("admin")) {
+                        intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                    } else if (cleanRole.equals("staff")) {
+                        intent = new Intent(LoginActivity.this, StaffDashboardActivity.class);
                     } else {
-                        if (cleanRole.equals("patient")) {
-                            intent = new Intent(LoginActivity.this, PatientHomeActivity.class);
-                        } else {
-                            Toast.makeText(LoginActivity.this, "Access Denied: Please use the Staff/Admin toggle to login.", Toast.LENGTH_LONG).show();
-                        }
+                        // Default for patient or any other role
+                        intent = new Intent(LoginActivity.this, PatientHomeActivity.class);
                     }
 
                     if (intent != null) {
@@ -126,7 +121,9 @@ public class LoginActivity extends AppCompatActivity {
                         finish();
                     }
                 } else {
-                    Toast.makeText(LoginActivity.this, "User data not found in database.", Toast.LENGTH_LONG).show();
+                    // If user exists in Auth but not in DB, assume Patient
+                    startActivity(new Intent(LoginActivity.this, PatientHomeActivity.class));
+                    finish();
                 }
             }
 

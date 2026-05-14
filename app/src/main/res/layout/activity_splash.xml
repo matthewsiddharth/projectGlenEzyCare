@@ -4,11 +4,11 @@
     android:layout_height="match_parent"
     android:background="@drawable/doctor">
 
-    <!-- Lower brightness/faded effect using a semi-transparent black overlay -->
+    <!-- Darker overlay for better text visibility -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#66000000" />
+        android:background="#99000000" />
 
     <LinearLayout
         android:layout_width="wrap_content"

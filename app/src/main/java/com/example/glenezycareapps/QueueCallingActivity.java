@@ -37,7 +37,7 @@ public class QueueCallingActivity extends AppCompatActivity {
             btnBack.setOnClickListener(v -> finish());
         }
 
-        queueRef = FirebaseDatabase.getInstance()
+        queueRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
                 .getReference("queue");
 
         btnCallNext.setOnClickListener(v -> callNextQueue());

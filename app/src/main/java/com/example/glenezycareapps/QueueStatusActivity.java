@@ -40,7 +40,7 @@ public class QueueStatusActivity extends AppCompatActivity {
         btnRefreshQueue = findViewById(R.id.btnRefreshQueue);
 
         mAuth = FirebaseAuth.getInstance();
-        queueRef = FirebaseDatabase.getInstance().getReference("queue");
+        queueRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("queue");
 
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
@@ -77,7 +77,8 @@ public class QueueStatusActivity extends AppCompatActivity {
         if (mAuth.getCurrentUser() == null) return;
 
         String userId = mAuth.getCurrentUser().getUid();
-        userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+        userRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("users").child(userId);
 
         userRef.child("currentTicket").addValueEventListener(new ValueEventListener() {
             @Override

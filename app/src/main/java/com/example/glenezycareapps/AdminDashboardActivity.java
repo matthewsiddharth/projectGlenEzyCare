@@ -18,7 +18,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
             btnManageAppointments,
             btnQueueControl,
             btnViewQueueStatus;
-    ImageView btnMenu, btnBack;
+    ImageView btnMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +31,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         btnQueueControl = findViewById(R.id.btnQueueControl);
         btnViewQueueStatus = findViewById(R.id.btnViewQueueStatus);
         btnMenu = findViewById(R.id.btnMenu);
-        btnBack = findViewById(R.id.btnBack);
 
-        btnBack.setOnClickListener(v -> finish());
         btnMenu.setOnClickListener(v -> showPopupMenu(v));
 
         btnManageStaff.setOnClickListener(v -> {

@@ -164,10 +164,11 @@
                     android:id="@+id/btnGoToChangePassword"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
+                    android:background="@drawable/button_outline"
                     android:text="CHANGE PASSWORD"
-                    android:textColor="#2196F3"
-                    android:textStyle="bold"
-                    android:background="@drawable/button_outline"/>
+                    android:textColor="#F4F4F4"
+                    android:textColorLink="#FFFFFF"
+                    android:textStyle="bold" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

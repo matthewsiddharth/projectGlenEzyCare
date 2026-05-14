@@ -43,10 +43,12 @@ public class QueueActivity extends AppCompatActivity {
         btnGenerateQueue = findViewById(R.id.btnGenerateQueue);
 
         mAuth = FirebaseAuth.getInstance();
-        queueRef = FirebaseDatabase.getInstance().getReference("queue");
+        queueRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("queue");
         
         if (mAuth.getCurrentUser() != null) {
-            userRef = FirebaseDatabase.getInstance().getReference("users").child(mAuth.getCurrentUser().getUid());
+            userRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                    .getReference("users").child(mAuth.getCurrentUser().getUid());
         }
 
         btnGenerateQueue.setOnClickListener(v -> generateQueue());
@@ -100,6 +102,11 @@ public class QueueActivity extends AppCompatActivity {
                                         QueueActivity.this,
                                         "Queue Ticket Generated: " + queueNumber,
                                         Toast.LENGTH_SHORT).show();
+
+                                // Automatically navigate to Status screen so they can track it
+                                android.content.Intent intent = new android.content.Intent(QueueActivity.this, QueueStatusActivity.class);
+                                startActivity(intent);
+                                finish();
                             }
 
                             @Override

@@ -21,20 +21,24 @@ public class SplashActivity extends AppCompatActivity {
         TextView tvAppName = findViewById(R.id.tvAppName);
         TextView tvSlogan = findViewById(R.id.tvSlogan);
         
-        // Hide slogan initially for animation
+        // Hide initially so they can fade in
+        tvAppName.setAlpha(0f);
         tvSlogan.setAlpha(0f);
         
-        // Load animations
-        Animation fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in_up);
-        
-        // Animate App Name slightly
-        tvAppName.setAlpha(0f);
-        tvAppName.animate().alpha(1f).setDuration(1500).start();
+        // Use ViewPropertyAnimator for more reliable animations
+        tvAppName.animate()
+                .alpha(1f)
+                .translationYBy(-20f)
+                .setDuration(1000)
+                .setStartDelay(300)
+                .start();
 
-        // Start slogan animation after 1.2 seconds delay
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            tvSlogan.startAnimation(fadeIn);
-        }, 1200);
+        tvSlogan.animate()
+                .alpha(1f)
+                .translationYBy(-20f)
+                .setDuration(1000)
+                .setStartDelay(1000)
+                .start();
 
         // Transition to LoginActivity after 4.5 seconds
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
