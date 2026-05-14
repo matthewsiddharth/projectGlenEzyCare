@@ -58,7 +58,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
         }
 
         if (newPass.length() < 6) {
-            Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Password must be at least 6 letters or numbers", Toast.LENGTH_SHORT).show();
             return;
         }
 
