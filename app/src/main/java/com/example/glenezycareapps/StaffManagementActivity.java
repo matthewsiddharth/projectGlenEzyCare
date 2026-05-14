@@ -44,7 +44,7 @@ public class StaffManagementActivity extends AppCompatActivity {
         }
 
         staffRef = FirebaseDatabase
-                .getInstance()
+                .getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
                 .getReference("staff");
 
         btnAddStaff.setOnClickListener(v -> addStaff());

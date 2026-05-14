@@ -60,10 +60,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         popupMenu.getMenuInflater().inflate(R.menu.main_menu, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.menu_home) {
-                // Already on Home for this dashboard
-                return true;
-            } else if (id == R.id.menu_profile) {
+            if (id == R.id.menu_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 return true;
             } else if (id == R.id.menu_logout) {

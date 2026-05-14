@@ -104,6 +104,13 @@ public class LoginActivity extends AppCompatActivity {
 
                 Log.d("LoginDebug", "Detected role: " + role);
                 boolean isAdminStaffMode = switchRole.isChecked();
+
+                // Only check for email verification if the user role is patient
+                if (role.contains("patient") && mAuth.getCurrentUser() != null && !mAuth.getCurrentUser().isEmailVerified()) {
+                    Toast.makeText(LoginActivity.this, "Please verify your email address first.", Toast.LENGTH_LONG).show();
+                    mAuth.signOut();
+                    return;
+                }
                 
                 Intent intent = null;
 

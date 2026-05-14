@@ -5,16 +5,20 @@ public class UserModel {
     private String email;
     private String role;
     private String userId;
+    private String phone;
+    private String profilePic;
 
     public UserModel() {
         // Required for Firebase
     }
 
-    public UserModel(String fullName, String email, String role, String userId) {
+    public UserModel(String fullName, String email, String role, String userId, String phone, String profilePic) {
         this.fullName = fullName;
         this.email = email;
         this.role = role;
         this.userId = userId;
+        this.phone = phone;
+        this.profilePic = profilePic;
     }
 
     public String getFullName() {
@@ -47,5 +51,21 @@ public class UserModel {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getProfilePic() {
+        return profilePic;
+    }
+
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
     }
 }

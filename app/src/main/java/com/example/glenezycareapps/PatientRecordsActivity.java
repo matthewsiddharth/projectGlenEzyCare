@@ -37,7 +37,7 @@ public class PatientRecordsActivity extends AppCompatActivity {
         });
         rvPatientRecords.setAdapter(adapter);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("users");
+        databaseReference = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("users");
         fetchPatients();
     }
 
@@ -47,7 +47,8 @@ public class PatientRecordsActivity extends AppCompatActivity {
         builder.setTitle(patient.getFullName());
         builder.setItems(options, (dialog, which) -> {
             if (which == 0) {
-                Toast.makeText(this, "Email: " + patient.getEmail(), Toast.LENGTH_LONG).show();
+                String details = "Email: " + patient.getEmail() + "\nPhone: " + (patient.getPhone() != null ? patient.getPhone() : "Not provided");
+                Toast.makeText(this, details, Toast.LENGTH_LONG).show();
             } else if (which == 1) {
                 new AlertDialog.Builder(this)
                         .setTitle("Delete Record")

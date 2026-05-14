@@ -78,7 +78,10 @@ public class ProfileActivity extends AppCompatActivity {
         userId = mAuth.getCurrentUser().getUid();
         databaseReference = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
                 .getReference("users").child(userId);
-        storageReference = FirebaseStorage.getInstance().getReference("profile_pics").child(userId + ".jpg");
+        
+        // Explicitly use the bucket URL from your google-services.json
+        storageReference = FirebaseStorage.getInstance("gs://glenezycare-apps.firebasestorage.app")
+                .getReference("profile_pics").child(userId + ".jpg");
 
         loadUserProfile();
 
@@ -94,7 +97,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void loadUserProfile() {
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -103,11 +106,11 @@ public class ProfileActivity extends AppCompatActivity {
                     String phone = snapshot.child("phone").getValue(String.class);
                     String profilePicUrl = snapshot.child("profilePic").getValue(String.class);
 
-                    etFullName.setText(name);
+                    if (etFullName.hasFocus() == false) etFullName.setText(name);
                     etEmail.setText(email);
-                    etPhone.setText(phone != null ? phone : "");
+                    if (etPhone.hasFocus() == false) etPhone.setText(phone != null ? phone : "");
 
-                    if (profilePicUrl != null && !profilePicUrl.isEmpty()) {
+                    if (profilePicUrl != null && !profilePicUrl.isEmpty() && !isDestroyed()) {
                         Glide.with(ProfileActivity.this)
                                 .load(profilePicUrl)
                                 .placeholder(android.R.drawable.ic_menu_myplaces)
@@ -128,25 +131,27 @@ public class ProfileActivity extends AppCompatActivity {
             progressDialog.setMessage("Uploading picture...");
             progressDialog.show();
 
-            storageReference.putFile(imageUri).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    storageReference.getDownloadUrl().addOnSuccessListener(uri -> {
-                        String downloadUrl = uri.toString();
-                        databaseReference.child("profilePic").setValue(downloadUrl)
-                                .addOnCompleteListener(dbTask -> {
-                                    progressDialog.dismiss();
-                                    if (dbTask.isSuccessful()) {
-                                        Toast.makeText(ProfileActivity.this, "Profile picture updated", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        Toast.makeText(ProfileActivity.this, "Failed to update database", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+            storageReference.putFile(imageUri)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        // Get the download URL after successful upload
+                        taskSnapshot.getStorage().getDownloadUrl().addOnSuccessListener(uri -> {
+                            String downloadUrl = uri.toString();
+                            databaseReference.child("profilePic").setValue(downloadUrl)
+                                    .addOnCompleteListener(dbTask -> {
+                                        progressDialog.dismiss();
+                                        if (dbTask.isSuccessful()) {
+                                            Toast.makeText(ProfileActivity.this, "Profile picture updated", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(ProfileActivity.this, "Failed to update database", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        });
+                    })
+                    .addOnFailureListener(e -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(ProfileActivity.this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        android.util.Log.e("StorageError", "Error: ", e);
                     });
-                } else {
-                    progressDialog.dismiss();
-                    Toast.makeText(ProfileActivity.this, "Upload failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
         }
     }
 

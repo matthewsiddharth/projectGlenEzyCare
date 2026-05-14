@@ -37,7 +37,7 @@ public class AppointmentManagementActivity extends AppCompatActivity {
         });
         rvAppointments.setAdapter(adapter);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("appointments");
+        databaseReference = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("appointments");
         fetchAppointments();
     }
 

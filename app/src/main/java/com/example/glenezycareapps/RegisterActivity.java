@@ -86,13 +86,24 @@ public class RegisterActivity extends AppCompatActivity {
 
                             databaseReference.child(userId).setValue(userMap).addOnCompleteListener(dbTask -> {
                                 if (dbTask.isSuccessful()) {
-                                    Toast.makeText(RegisterActivity.this,
-                                            "Registration Successful",
-                                            Toast.LENGTH_SHORT).show();
-
-                                    // IMPROVEMENT: Go directly to PatientHome instead of making them login again
-                                    startActivity(new Intent(RegisterActivity.this, PatientHomeActivity.class));
-                                    finish();
+                                    // Send verification email
+                                    mAuth.getCurrentUser().sendEmailVerification()
+                                            .addOnCompleteListener(verifyTask -> {
+                                                if (verifyTask.isSuccessful()) {
+                                                    Toast.makeText(RegisterActivity.this,
+                                                            "Registration Successful. Please verify your email before logging in.",
+                                                            Toast.LENGTH_LONG).show();
+                                                } else {
+                                                    Toast.makeText(RegisterActivity.this,
+                                                            "Verification email failed to send.",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                                
+                                                // Sign out so they have to log in manually after verification
+                                                mAuth.signOut();
+                                                startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                                                finish();
+                                            });
                                 } else {
                                     Toast.makeText(RegisterActivity.this,
                                             "Database Error: " + (dbTask.getException() != null ? dbTask.getException().getMessage() : "Failed to save user data"),

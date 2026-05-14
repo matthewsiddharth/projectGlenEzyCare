@@ -50,7 +50,7 @@ public class AppointmentHistoryActivity extends AppCompatActivity {
         rvAppointmentHistory.setAdapter(adapter);
 
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        databaseReference = FirebaseDatabase.getInstance().getReference("appointments");
+        databaseReference = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("appointments");
         fetchHistory();
     }
 
