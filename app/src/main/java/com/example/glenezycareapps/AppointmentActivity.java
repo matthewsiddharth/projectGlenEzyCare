@@ -4,15 +4,9 @@
 
 package com.example.glenezycareapps;
 
-import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.Toast;
-
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -53,8 +47,8 @@ public class AppointmentActivity extends AppCompatActivity {
         btnBookAppointment = findViewById(R.id.btnBookAppointment);
 
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        appointmentRef = FirebaseDatabase.getInstance().getReference("appointments");
-        userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId);
+        appointmentRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("appointments");
+        userRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("users").child(currentUserId);
 
         // Fetch current user's name
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {

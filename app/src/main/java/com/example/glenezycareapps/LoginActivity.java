@@ -96,33 +96,38 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 progressDialog.dismiss();
-                if (snapshot.exists()) {
-                    String role = snapshot.child("role").getValue(String.class);
-                    // Default to patient if role is missing
-                    if (role == null) {
-                        role = "patient";
-                    }
+                
+                String role = "patient";
+                if (snapshot.exists() && snapshot.hasChild("role")) {
+                    role = String.valueOf(snapshot.child("role").getValue()).trim().toLowerCase();
+                }
 
-                    String cleanRole = role.trim().toLowerCase();
-                    Log.d("LoginDebug", "Detected role: " + cleanRole);
-                    
-                    Intent intent = null;
-                    if (cleanRole.equals("admin")) {
+                Log.d("LoginDebug", "Detected role: " + role);
+                boolean isAdminStaffMode = switchRole.isChecked();
+                
+                Intent intent = null;
+
+                if (isAdminStaffMode) {
+                    // Trying to login as Staff/Admin
+                    if (role.contains("admin")) {
                         intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
-                    } else if (cleanRole.equals("staff")) {
+                    } else if (role.contains("staff")) {
                         intent = new Intent(LoginActivity.this, StaffDashboardActivity.class);
                     } else {
-                        // Default for patient or any other role
-                        intent = new Intent(LoginActivity.this, PatientHomeActivity.class);
-                    }
-
-                    if (intent != null) {
-                        startActivity(intent);
-                        finish();
+                        Toast.makeText(LoginActivity.this, "Access Denied: Your account role is '" + role + "'. You are not authorized for Staff/Admin access.", Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    // If user exists in Auth but not in DB, assume Patient
-                    startActivity(new Intent(LoginActivity.this, PatientHomeActivity.class));
+                    // Trying to login as Patient
+                    if (role.contains("patient")) {
+                        intent = new Intent(LoginActivity.this, PatientHomeActivity.class);
+                    } else {
+                        // User is staff/admin but forgot to flip the switch
+                        Toast.makeText(LoginActivity.this, "Access Denied: You have a '" + role + "' account. Please use the Staff/Admin toggle to login.", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                if (intent != null) {
+                    startActivity(intent);
                     finish();
                 }
             }

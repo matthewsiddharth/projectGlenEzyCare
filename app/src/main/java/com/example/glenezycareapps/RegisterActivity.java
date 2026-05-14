@@ -90,7 +90,8 @@ public class RegisterActivity extends AppCompatActivity {
                                             "Registration Successful",
                                             Toast.LENGTH_SHORT).show();
 
-                                    startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                                    // IMPROVEMENT: Go directly to PatientHome instead of making them login again
+                                    startActivity(new Intent(RegisterActivity.this, PatientHomeActivity.class));
                                     finish();
                                 } else {
                                     Toast.makeText(RegisterActivity.this,
