@@ -65,15 +65,15 @@ public class PatientRecordsActivity extends AppCompatActivity {
     }
 
     private void fetchPatients() {
-        databaseReference.orderByChild("role").equalTo("patient").addValueEventListener(new ValueEventListener() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 patientList.clear();
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    UserModel patient = dataSnapshot.getValue(UserModel.class);
-                    if (patient != null) {
-                        patient.setUserId(dataSnapshot.getKey());
-                        patientList.add(patient);
+                    UserModel user = dataSnapshot.getValue(UserModel.class);
+                    if (user != null && "patient".equals(user.getRole())) {
+                        user.setUserId(dataSnapshot.getKey());
+                        patientList.add(user);
                     }
                 }
                 adapter.notifyDataSetChanged();

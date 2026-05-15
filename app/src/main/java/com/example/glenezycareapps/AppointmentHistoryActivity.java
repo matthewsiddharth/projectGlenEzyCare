@@ -55,13 +55,13 @@ public class AppointmentHistoryActivity extends AppCompatActivity {
     }
 
     private void fetchHistory() {
-        databaseReference.orderByChild("patientId").equalTo(currentUserId).addValueEventListener(new ValueEventListener() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 appointmentList.clear();
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     AppointmentModel appointment = dataSnapshot.getValue(AppointmentModel.class);
-                    if (appointment != null) {
+                    if (appointment != null && currentUserId.equals(appointment.getPatientId())) {
                         appointment.setAppointmentId(dataSnapshot.getKey());
                         appointmentList.add(appointment);
                     }

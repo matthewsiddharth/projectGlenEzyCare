@@ -164,6 +164,12 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
+        // Phone Validation (Allows optional +, then 10-13 digits)
+        if (!phone.isEmpty() && !phone.matches("^\\+?[0-9]{10,13}$")) {
+            Toast.makeText(this, "Please enter a valid phone number (10-13 digits)", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         progressDialog.setMessage("Updating profile...");
         progressDialog.show();
 
