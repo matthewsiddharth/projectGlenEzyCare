@@ -98,8 +98,17 @@ public class AppointmentActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        String[] specialties = {"Cardiology", "ENT", "Orthopedic"};
-        String[] doctors = {"Dr Ali", "Dr Sarah", "Dr John"};
+        String[] specialties = {
+                "Cardiology", "ENT (Otorhinolaryngology)", "Orthopedic Surgery",
+                "Dermatology", "Pediatrics", "Obstetrics & Gynecology",
+                "Ophthalmology", "Gastroenterology", "Neurology",
+                "Psychiatry", "Dentistry", "General Surgery"
+        };
+        String[] doctors = {
+                "Dr Ali", "Dr Sarah", "Dr John", "Dr Lim",
+                "Dr Siti", "Dr Wong", "Dr Tan", "Dr Kumar",
+                "Dr Raj", "Dr Low", "Dr Ng", "Dr Ibrahim"
+        };
         String[] timeSlots = {
                 "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM", 
                 "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM", 
