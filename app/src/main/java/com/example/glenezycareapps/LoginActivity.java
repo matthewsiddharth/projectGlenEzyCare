@@ -61,9 +61,9 @@ public class LoginActivity extends AppCompatActivity {
 
         switchRole.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                btnLogin.setText("SIGN IN AS STAFF/ADMIN");
+                btnLogin.setBackgroundResource(R.drawable.button_staff_gradient);
             } else {
-                btnLogin.setText("Sign In");
+                btnLogin.setBackgroundResource(R.drawable.button_gradient);
             }
         });
     }
@@ -105,11 +105,13 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d("LoginDebug", "Detected role: " + role);
                 boolean isAdminStaffMode = switchRole.isChecked();
 
-                // Only check for email verification if the user role is patient
-                if (role.contains("patient") && mAuth.getCurrentUser() != null && !mAuth.getCurrentUser().isEmailVerified()) {
-                    Toast.makeText(LoginActivity.this, "Please verify your email address first.", Toast.LENGTH_LONG).show();
-                    mAuth.signOut();
-                    return;
+                // Requirement: Patients and Staff must verify their email. Admins are exempt.
+                if (mAuth.getCurrentUser() != null && !mAuth.getCurrentUser().isEmailVerified()) {
+                    if (!role.contains("admin")) {
+                        Toast.makeText(LoginActivity.this, "Your account is not verified. Please check your email for the verification link.", Toast.LENGTH_LONG).show();
+                        mAuth.signOut();
+                        return;
+                    }
                 }
                 
                 Intent intent = null;

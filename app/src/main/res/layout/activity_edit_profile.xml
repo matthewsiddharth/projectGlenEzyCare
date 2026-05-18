@@ -33,21 +33,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="20dp"
-        android:text="My Profile"
+        android:text="Edit Profile"
         android:textColor="@color/white"
         android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnBack" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Manage your personal information"
-        android:textColor="#E3F2FD"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="@+id/tvHeaderTitle"
-        app:layout_constraintTop_toBottomOf="@+id/tvHeaderTitle" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -109,7 +100,6 @@
                     android:background="@drawable/edittext_rounded"
                     android:hint="Your Name"
                     android:padding="15dp"
-                    android:enabled="false"
                     android:layout_marginBottom="16dp"
                     android:textColor="#333333"/>
 
@@ -147,20 +137,28 @@
                     android:background="@drawable/edittext_rounded"
                     android:hint="Phone Number"
                     android:inputType="phone"
-                    android:enabled="false"
                     android:padding="15dp"
                     android:layout_marginBottom="32dp"
                     android:textColor="#333333"/>
 
                 <Button
-                    android:id="@+id/btnEditProfile"
+                    android:id="@+id/btnSaveChanges"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
-                    android:text="EDIT PROFILE"
+                    android:text="SAVE CHANGES"
                     android:textColor="@color/white"
                     android:textStyle="bold"
                     android:background="@drawable/button_gradient"
                     android:layout_marginBottom="12dp"/>
+
+                <Button
+                    android:id="@+id/btnGoToChangePassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:background="@drawable/button_outline"
+                    android:text="CHANGE PASSWORD"
+                    android:textColor="#333333"
+                    android:textStyle="bold" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

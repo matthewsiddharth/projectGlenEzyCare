@@ -51,6 +51,9 @@
             android:name=".ProfileActivity"
             android:exported="false" />
         <activity
+            android:name=".EditProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>

@@ -19,6 +19,7 @@ import com.google.firebase.database.*;
 public class QueueStatusActivity extends AppCompatActivity {
 
     TextView tvCurrentQueue, tvYourQueueNumber, tvYourQueueStatus;
+    TextView tvYourDoctor, tvYourSpecialty, tvYourFloor;
     CardView cardYourTicket;
     android.widget.ImageView btnBack;
     android.widget.Button btnRefreshQueue;
@@ -35,6 +36,10 @@ public class QueueStatusActivity extends AppCompatActivity {
         tvCurrentQueue = findViewById(R.id.tvCurrentQueue);
         tvYourQueueNumber = findViewById(R.id.tvYourQueueNumber);
         tvYourQueueStatus = findViewById(R.id.tvYourQueueStatus);
+        tvYourDoctor = findViewById(R.id.tvYourDoctor);
+        tvYourSpecialty = findViewById(R.id.tvYourSpecialty);
+        tvYourFloor = findViewById(R.id.tvYourFloor);
+        
         cardYourTicket = findViewById(R.id.cardYourTicket);
         btnBack = findViewById(R.id.btnBack);
         btnRefreshQueue = findViewById(R.id.btnRefreshQueue);
@@ -86,11 +91,18 @@ public class QueueStatusActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     String queueNumber = snapshot.child("queueNumber").getValue(String.class);
                     String status = snapshot.child("status").getValue(String.class);
+                    String doctor = snapshot.child("doctor").getValue(String.class);
+                    String specialty = snapshot.child("specialty").getValue(String.class);
+                    String floor = snapshot.child("floor").getValue(String.class);
 
                     if (queueNumber != null) {
                         cardYourTicket.setVisibility(View.VISIBLE);
                         tvYourQueueNumber.setText(queueNumber);
                         tvYourQueueStatus.setText("Status: " + (status != null ? status : "Waiting"));
+                        
+                        tvYourDoctor.setText("Doctor: " + (doctor != null ? doctor : "---"));
+                        tvYourSpecialty.setText("Specialty: " + (specialty != null ? specialty : "---"));
+                        tvYourFloor.setText("Location: " + (floor != null ? floor : "---"));
                     }
                 } else {
                     cardYourTicket.setVisibility(View.GONE);

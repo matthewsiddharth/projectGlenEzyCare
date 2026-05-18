@@ -30,15 +30,18 @@
                 android:gravity="center"
                 android:orientation="vertical"
                 android:paddingTop="60dp"
-                android:paddingBottom="40dp"
+                android:paddingBottom="20dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:src="@drawable/logo" />
+                    android:layout_width="160dp"
+                    android:layout_height="160dp"
+                    android:src="@drawable/logo"
+                    android:background="@drawable/logo_background"
+                    android:alpha="1.0"
+                    android:contentDescription="App Logo" />
 
                 <TextView
                     android:layout_width="wrap_content"

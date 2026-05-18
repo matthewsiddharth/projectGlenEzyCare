@@ -3,6 +3,7 @@ package com.example.glenezycareapps;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,15 +13,18 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
 
     private List<AppointmentModel> appointmentList;
     private boolean showPatientName;
+    private boolean isHistoryView;
     private OnAppointmentClickListener listener;
 
     public interface OnAppointmentClickListener {
         void onAppointmentClick(AppointmentModel appointment);
+        void onCancelClick(AppointmentModel appointment);
     }
 
-    public AppointmentAdapter(List<AppointmentModel> appointmentList, boolean showPatientName, OnAppointmentClickListener listener) {
+    public AppointmentAdapter(List<AppointmentModel> appointmentList, boolean showPatientName, boolean isHistoryView, OnAppointmentClickListener listener) {
         this.appointmentList = appointmentList;
         this.showPatientName = showPatientName;
+        this.isHistoryView = isHistoryView;
         this.listener = listener;
     }
 
@@ -58,6 +62,18 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
             holder.tvPatientName.setVisibility(View.GONE);
         }
 
+        // Show Cancel button only in history view for pending appointments
+        if (isHistoryView && "Pending".equals(appointment.getStatus())) {
+            holder.btnCancelAppointment.setVisibility(View.VISIBLE);
+            holder.btnCancelAppointment.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onCancelClick(appointment);
+                }
+            });
+        } else {
+            holder.btnCancelAppointment.setVisibility(View.GONE);
+        }
+
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onAppointmentClick(appointment);
@@ -72,6 +88,7 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
 
     public static class AppointmentViewHolder extends RecyclerView.ViewHolder {
         TextView tvDoctorName, tvSpecialty, tvDate, tvTime, tvStatus, tvPatientName;
+        Button btnCancelAppointment;
 
         public AppointmentViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -81,6 +98,7 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
             tvTime = itemView.findViewById(R.id.tvTime);
             tvStatus = itemView.findViewById(R.id.tvStatus);
             tvPatientName = itemView.findViewById(R.id.tvPatientName);
+            btnCancelAppointment = itemView.findViewById(R.id.btnCancelAppointment);
         }
     }
 }

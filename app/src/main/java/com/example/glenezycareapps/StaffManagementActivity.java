@@ -18,10 +18,7 @@ import java.util.HashMap;
 
 public class StaffManagementActivity extends AppCompatActivity {
 
-    EditText etStaffName,
-            etStaffEmail,
-            etStaffRole;
-
+    EditText etStaffName, etStaffEmail, etStaffRole;
     Button btnAddStaff;
     android.widget.ImageView btnBack;
 
@@ -43,6 +40,7 @@ public class StaffManagementActivity extends AppCompatActivity {
             btnBack.setOnClickListener(v -> finish());
         }
 
+        // Use the common database path
         staffRef = FirebaseDatabase
                 .getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
                 .getReference("staff");
@@ -51,23 +49,35 @@ public class StaffManagementActivity extends AppCompatActivity {
     }
 
     private void addStaff() {
+        String name = etStaffName.getText().toString().trim();
+        String email = etStaffEmail.getText().toString().trim();
+        String role = etStaffRole.getText().toString().trim().toLowerCase();
 
-        HashMap<String, String> staffMap =
-                new HashMap<>();
+        if (name.isEmpty() || email.isEmpty() || role.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        staffMap.put("fullName",
-                etStaffName.getText().toString());
+        if (!role.equals("staff") && !role.equals("admin")) {
+            Toast.makeText(this, "Role must be 'staff' or 'admin'", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        staffMap.put("email",
-                etStaffEmail.getText().toString());
+        HashMap<String, String> staffMap = new HashMap<>();
+        staffMap.put("fullName", name);
+        staffMap.put("email", email);
+        staffMap.put("role", role);
 
-        staffMap.put("role",
-                etStaffRole.getText().toString());
-
-        staffRef.push().setValue(staffMap);
-
-        Toast.makeText(this,
-                "Staff Added Successfully",
-                Toast.LENGTH_SHORT).show();
+        // Push to a list of pre-approved staff
+        staffRef.push().setValue(staffMap).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(this, "Staff invitation sent. The user can now register using this email and must verify it.", Toast.LENGTH_LONG).show();
+                etStaffName.setText("");
+                etStaffEmail.setText("");
+                etStaffRole.setText("");
+            } else {
+                Toast.makeText(this, "Error adding staff: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

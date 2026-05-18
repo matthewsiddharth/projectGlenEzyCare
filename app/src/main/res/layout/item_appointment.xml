@@ -99,6 +99,20 @@
             android:textSize="14sp"
             android:visibility="gone" />
 
+        <Button
+            android:id="@+id/btnCancelAppointment"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#FF5252"
+            android:paddingHorizontal="16dp"
+            android:text="Cancel"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

@@ -18,9 +18,11 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="180dp"
-            android:layout_height="180dp"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
             android:src="@drawable/logo"
+            android:background="@drawable/logo_background"
+            android:alpha="1.0"
             android:contentDescription="App Logo" />
 
         <TextView

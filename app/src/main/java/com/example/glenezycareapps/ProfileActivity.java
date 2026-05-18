@@ -1,17 +1,13 @@
 package com.example.glenezycareapps;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,39 +19,20 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileActivity extends AppCompatActivity {
 
     EditText etFullName, etEmail, etPhone;
-    Button btnUpdateProfile, btnChangePassword;
+    Button btnEditProfile;
     ImageView btnBack;
     CircleImageView ivProfilePic;
     FloatingActionButton btnEditPic;
 
     FirebaseAuth mAuth;
     DatabaseReference databaseReference;
-    StorageReference storageReference;
     String userId;
-    Uri imageUri;
-    ProgressDialog progressDialog;
-
-    private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    imageUri = result.getData().getData();
-                    ivProfilePic.setImageURI(imageUri);
-                    uploadProfilePicture();
-                }
-            }
-    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,34 +42,24 @@ public class ProfileActivity extends AppCompatActivity {
         etFullName = findViewById(R.id.etFullName);
         etEmail = findViewById(R.id.etEmail);
         etPhone = findViewById(R.id.etPhone);
-        btnUpdateProfile = findViewById(R.id.btnUpdateProfile);
-        btnChangePassword = findViewById(R.id.btnGoToChangePassword);
+        btnEditProfile = findViewById(R.id.btnEditProfile);
         btnBack = findViewById(R.id.btnBack);
         ivProfilePic = findViewById(R.id.ivProfilePic);
         btnEditPic = findViewById(R.id.btnEditPic);
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
+        // Hide edit pic button in view mode
+        btnEditPic.setVisibility(View.GONE);
 
         mAuth = FirebaseAuth.getInstance();
         userId = mAuth.getCurrentUser().getUid();
         databaseReference = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
                 .getReference("users").child(userId);
         
-        // Explicitly use the bucket URL from your google-services.json
-        storageReference = FirebaseStorage.getInstance("gs://glenezycare-apps.firebasestorage.app")
-                .getReference("profile_pics").child(userId + ".jpg");
-
         loadUserProfile();
 
-        btnBack.setOnClickListener(v -> onBackPressed());
-        btnUpdateProfile.setOnClickListener(v -> updateProfile());
-        btnChangePassword.setOnClickListener(v -> {
-            startActivity(new Intent(ProfileActivity.this, ChangePasswordActivity.class));
-        });
-        btnEditPic.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            imagePickerLauncher.launch(intent);
+        btnBack.setOnClickListener(v -> finish());
+        btnEditProfile.setOnClickListener(v -> {
+            startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class));
         });
     }
 
@@ -106,9 +73,9 @@ public class ProfileActivity extends AppCompatActivity {
                     String phone = snapshot.child("phone").getValue(String.class);
                     String profilePicUrl = snapshot.child("profilePic").getValue(String.class);
 
-                    if (etFullName.hasFocus() == false) etFullName.setText(name);
+                    etFullName.setText(name);
                     etEmail.setText(email);
-                    if (etPhone.hasFocus() == false) etPhone.setText(phone != null ? phone : "");
+                    etPhone.setText(phone != null ? phone : "");
 
                     if (profilePicUrl != null && !profilePicUrl.isEmpty() && !isDestroyed()) {
                         Glide.with(ProfileActivity.this)
@@ -122,67 +89,6 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(ProfileActivity.this, "Failed to load profile", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void uploadProfilePicture() {
-        if (imageUri != null) {
-            progressDialog.setMessage("Uploading picture...");
-            progressDialog.show();
-
-            storageReference.putFile(imageUri)
-                    .addOnSuccessListener(taskSnapshot -> {
-                        // Get the download URL after successful upload
-                        taskSnapshot.getStorage().getDownloadUrl().addOnSuccessListener(uri -> {
-                            String downloadUrl = uri.toString();
-                            databaseReference.child("profilePic").setValue(downloadUrl)
-                                    .addOnCompleteListener(dbTask -> {
-                                        progressDialog.dismiss();
-                                        if (dbTask.isSuccessful()) {
-                                            Toast.makeText(ProfileActivity.this, "Profile picture updated", Toast.LENGTH_SHORT).show();
-                                        } else {
-                                            Toast.makeText(ProfileActivity.this, "Failed to update database", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                        });
-                    })
-                    .addOnFailureListener(e -> {
-                        progressDialog.dismiss();
-                        Toast.makeText(ProfileActivity.this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        android.util.Log.e("StorageError", "Error: ", e);
-                    });
-        }
-    }
-
-    private void updateProfile() {
-        String name = etFullName.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
-
-        if (name.isEmpty()) {
-            Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Phone Validation (Allows optional +, then 10-13 digits)
-        if (!phone.isEmpty() && !phone.matches("^\\+?[0-9]{10,13}$")) {
-            Toast.makeText(this, "Please enter a valid phone number (10-13 digits)", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        progressDialog.setMessage("Updating profile...");
-        progressDialog.show();
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("fullName", name);
-        updates.put("phone", phone);
-
-        databaseReference.updateChildren(updates).addOnCompleteListener(task -> {
-            progressDialog.dismiss();
-            if (task.isSuccessful()) {
-                Toast.makeText(this, "Profile Updated Successfully", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Update Failed", Toast.LENGTH_SHORT).show();
             }
         });
     }

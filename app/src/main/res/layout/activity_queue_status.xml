@@ -140,7 +140,45 @@
                         android:text="Waiting"
                         android:textColor="#1976D2"
                         android:textSize="16sp"
-                        android:layout_marginTop="4dp"/>
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#BBDEFB"
+                        android:layout_marginBottom="16dp"/>
+
+                    <TextView
+                        android:id="@+id/tvYourDoctor"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Doctor: ---"
+                        android:textColor="#333333"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:id="@+id/tvYourSpecialty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Specialty: ---"
+                        android:textColor="#666666"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:id="@+id/tvYourFloor"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Location: ---"
+                        android:textColor="#1976D2"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

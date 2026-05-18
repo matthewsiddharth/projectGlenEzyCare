@@ -32,8 +32,16 @@ public class AppointmentManagementActivity extends AppCompatActivity {
         rvAppointments.setLayoutManager(new LinearLayoutManager(this));
 
         appointmentList = new ArrayList<>();
-        adapter = new AppointmentAdapter(appointmentList, true, appointment -> {
-            showAppointmentActionDialog(appointment);
+        adapter = new AppointmentAdapter(appointmentList, true, false, new AppointmentAdapter.OnAppointmentClickListener() {
+            @Override
+            public void onAppointmentClick(AppointmentModel appointment) {
+                showAppointmentActionDialog(appointment);
+            }
+
+            @Override
+            public void onCancelClick(AppointmentModel appointment) {
+                // Not used in management view
+            }
         });
         rvAppointments.setAdapter(adapter);
 
@@ -42,7 +50,7 @@ public class AppointmentManagementActivity extends AppCompatActivity {
     }
 
     private void showAppointmentActionDialog(AppointmentModel appointment) {
-        String[] actions = {"Mark as Serving", "Mark as Completed", "Cancel Appointment", "Delete Record"};
+        String[] actions = {"Mark as Serving", "Mark as Completed", "Cancel Appointment"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Manage Appointment");
         builder.setItems(actions, (dialog, which) -> {
@@ -52,8 +60,6 @@ public class AppointmentManagementActivity extends AppCompatActivity {
                 updateStatus(appointment.getAppointmentId(), "Completed");
             } else if (which == 2) {
                 updateStatus(appointment.getAppointmentId(), "Cancelled");
-            } else if (which == 3) {
-                deleteAppointment(appointment.getAppointmentId());
             }
         });
         builder.show();
@@ -62,11 +68,6 @@ public class AppointmentManagementActivity extends AppCompatActivity {
     private void updateStatus(String id, String status) {
         databaseReference.child(id).child("status").setValue(status)
                 .addOnSuccessListener(aVoid -> Toast.makeText(this, "Status updated to " + status, Toast.LENGTH_SHORT).show());
-    }
-
-    private void deleteAppointment(String id) {
-        databaseReference.child(id).removeValue()
-                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Appointment deleted", Toast.LENGTH_SHORT).show());
     }
 
     private void fetchAppointments() {
