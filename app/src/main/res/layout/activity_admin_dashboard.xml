@@ -397,10 +397,13 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/navDashboard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#1A000000"
                 android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
                 android:padding="20dp">
 
                 <ImageView
@@ -419,9 +422,12 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/navStaff"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
                 android:padding="20dp">
 
                 <ImageView
@@ -439,9 +445,12 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/navPatients"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
                 android:padding="20dp">
 
                 <ImageView

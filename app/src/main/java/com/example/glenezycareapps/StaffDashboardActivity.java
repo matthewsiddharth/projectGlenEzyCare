@@ -24,7 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 public class StaffDashboardActivity extends AppCompatActivity {
 
     View btnCallQueue, btnPatientRecords, btnAppointments;
-    LinearLayout btnLogout, llLiveQueueList;
+    LinearLayout btnLogout, llLiveQueueList, navDashboard, navQueue, navPatients;
     TextView tvStaffName, tvStaffCurrentQueue, tvStaffWaitingCount;
     ImageView ivStaffProfile, btnMenu;
     DrawerLayout drawerLayout;
@@ -40,6 +40,9 @@ public class StaffDashboardActivity extends AppCompatActivity {
         btnPatientRecords = findViewById(R.id.btnPatientRecords);
         btnAppointments = findViewById(R.id.btnAppointments);
         btnLogout = findViewById(R.id.btnLogout);
+        navDashboard = findViewById(R.id.navDashboard);
+        navQueue = findViewById(R.id.navQueue);
+        navPatients = findViewById(R.id.navPatients);
         
         tvStaffName = findViewById(R.id.tvStaffName);
         ivStaffProfile = findViewById(R.id.ivStaffProfile);
@@ -59,6 +62,16 @@ public class StaffDashboardActivity extends AppCompatActivity {
         btnAppointments.setOnClickListener(v -> startActivity(new Intent(this, AppointmentManagementActivity.class)));
         btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
         ivStaffProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+
+        navDashboard.setOnClickListener(v -> drawerLayout.closeDrawer(GravityCompat.START));
+        navQueue.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+            startActivity(new Intent(this, QueueCallingActivity.class));
+        });
+        navPatients.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+            startActivity(new Intent(this, PatientRecordsActivity.class));
+        });
 
         btnLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();

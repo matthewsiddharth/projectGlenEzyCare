@@ -66,8 +66,39 @@ public class AppointmentManagementActivity extends AppCompatActivity {
     }
 
     private void updateStatus(String id, String status) {
-        databaseReference.child(id).child("status").setValue(status)
-                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Status updated to " + status, Toast.LENGTH_SHORT).show());
+        databaseReference.child(id).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                AppointmentModel appointment = task.getResult().getValue(AppointmentModel.class);
+                if (appointment != null) {
+                    databaseReference.child(id).child("status").setValue(status)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(this, "Status updated to " + status, Toast.LENGTH_SHORT).show();
+                                if (status.equals("Cancelled")) {
+                                    sendCancellationNotification(appointment);
+                                }
+                            });
+                }
+            }
+        });
+    }
+
+    private void sendCancellationNotification(AppointmentModel appointment) {
+        DatabaseReference notifRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("notifications").child(appointment.getPatientId());
+        
+        String notifId = notifRef.push().getKey();
+        if (notifId != null) {
+            NotificationModel notification = new NotificationModel(
+                    notifId,
+                    appointment.getPatientId(),
+                    "Appointment Cancelled",
+                    "Your appointment for " + appointment.getSpecialty() + " on " + appointment.getDate() + " has been cancelled by the hospital.",
+                    System.currentTimeMillis(),
+                    "cancellation",
+                    appointment.getAppointmentId()
+            );
+            notifRef.child(notifId).setValue(notification);
+        }
     }
 
     private void fetchAppointments() {

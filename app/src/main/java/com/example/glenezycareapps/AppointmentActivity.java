@@ -101,17 +101,40 @@ public class AppointmentActivity extends AppCompatActivity {
             appointmentMap.put("time", time);
             appointmentMap.put("status", "Pending");
 
-            appointmentRef.push().setValue(appointmentMap).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(this, "Appointment Booked", Toast.LENGTH_SHORT).show();
-                    finish();
-                } else {
-                    Toast.makeText(this, "Booking failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+            String pushId = appointmentRef.push().getKey();
+            if (pushId != null) {
+                appointmentRef.child(pushId).setValue(appointmentMap).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(this, "Appointment Booked", Toast.LENGTH_SHORT).show();
+                        sendBookingNotification(pushId, specialty, doctor, date, time);
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Booking failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         });
         
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+    }
+
+    private void sendBookingNotification(String appointmentId, String specialty, String doctor, String date, String time) {
+        DatabaseReference notifRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("notifications").child(currentUserId);
+        
+        String notifId = notifRef.push().getKey();
+        if (notifId != null) {
+            NotificationModel notification = new NotificationModel(
+                    notifId,
+                    currentUserId,
+                    "Appointment Confirmed",
+                    "Your appointment for " + specialty + " with " + doctor + " on " + date + " at " + time + " is confirmed.",
+                    System.currentTimeMillis(),
+                    "booking",
+                    appointmentId
+            );
+            notifRef.child(notifId).setValue(notification);
+        }
     }
 
     private void initializeDoctorData() {

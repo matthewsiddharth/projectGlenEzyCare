@@ -27,7 +27,7 @@ import java.util.Locale;
 public class AdminDashboardActivity extends AppCompatActivity {
 
     View btnManageStaff, btnManagePatients, btnQueueControl, btnViewQueueStatus;
-    LinearLayout btnLogout;
+    LinearLayout btnLogout, navDashboard, navStaff, navPatients;
     TextView tvAdminName, tvTotalPatients, tvActiveStaff, tvAppointmentsToday;
     ImageView ivAdminProfile, btnMenu;
     DrawerLayout drawerLayout;
@@ -44,6 +44,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
         btnQueueControl = findViewById(R.id.btnQueueControl);
         btnViewQueueStatus = findViewById(R.id.btnViewQueueStatus);
         btnLogout = findViewById(R.id.btnLogout);
+        navDashboard = findViewById(R.id.navDashboard);
+        navStaff = findViewById(R.id.navStaff);
+        navPatients = findViewById(R.id.navPatients);
+        
         tvAdminName = findViewById(R.id.tvAdminName);
         ivAdminProfile = findViewById(R.id.ivAdminProfile);
         btnMenu = findViewById(R.id.btnMenu);
@@ -66,6 +70,16 @@ public class AdminDashboardActivity extends AppCompatActivity {
         btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
 
         ivAdminProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+
+        navDashboard.setOnClickListener(v -> drawerLayout.closeDrawer(GravityCompat.START));
+        navStaff.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+            startActivity(new Intent(this, StaffManagementActivity.class));
+        });
+        navPatients.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+            startActivity(new Intent(this, PatientRecordsActivity.class));
+        });
 
         btnLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
