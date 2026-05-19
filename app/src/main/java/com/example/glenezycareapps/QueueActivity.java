@@ -35,7 +35,6 @@ public class QueueActivity extends AppCompatActivity {
     DatabaseReference userRef;
     FirebaseAuth mAuth;
 
-    private Map<String, String[]> specialtyDoctorMap;
     private Map<String, String> specialtyFloorMap;
 
     @Override
@@ -64,27 +63,13 @@ public class QueueActivity extends AppCompatActivity {
                     .getReference("users").child(mAuth.getCurrentUser().getUid());
         }
 
-        initializeData();
+        initializeFloorData();
         setupSpinners();
 
         btnGenerateQueue.setOnClickListener(v -> generateQueue());
     }
 
-    private void initializeData() {
-        specialtyDoctorMap = new HashMap<>();
-        specialtyDoctorMap.put("Cardiology", new String[]{"Dr Ali (Cardiologist)", "Dr Sarah (Cardiologist)"});
-        specialtyDoctorMap.put("ENT (Otorhinolaryngology)", new String[]{"Dr John (ENT Specialist)", "Dr Lim (ENT Specialist)"});
-        specialtyDoctorMap.put("Orthopedic Surgery", new String[]{"Dr Siti (Orthopedic Surgeon)", "Dr Wong (Orthopedic Surgeon)"});
-        specialtyDoctorMap.put("Dermatology", new String[]{"Dr Tan (Dermatologist)", "Dr Kumar (Dermatologist)"});
-        specialtyDoctorMap.put("Pediatrics", new String[]{"Dr Raj (Pediatrician)", "Dr Low (Pediatrician)"});
-        specialtyDoctorMap.put("Obstetrics & Gynecology", new String[]{"Dr Ng (Gynecologist)", "Dr Ibrahim (Gynecologist)"});
-        specialtyDoctorMap.put("Ophthalmology", new String[]{"Dr Chen (Ophthalmologist)", "Dr Kumar (Ophthalmologist)"});
-        specialtyDoctorMap.put("Gastroenterology", new String[]{"Dr Gupta (Gastroenterologist)", "Dr Lopez (Gastroenterologist)"});
-        specialtyDoctorMap.put("Neurology", new String[]{"Dr White (Neurologist)", "Dr Black (Neurologist)"});
-        specialtyDoctorMap.put("Psychiatry", new String[]{"Dr Green (Psychiatrist)", "Dr Blue (Psychiatrist)"});
-        specialtyDoctorMap.put("Dentistry", new String[]{"Dr Smile (Dentist)", "Dr Tooth (Dentist)"});
-        specialtyDoctorMap.put("General Surgery", new String[]{"Dr Sharp (Surgeon)", "Dr Cut (Surgeon)"});
-
+    private void initializeFloorData() {
         specialtyFloorMap = new HashMap<>();
         specialtyFloorMap.put("Cardiology", "Level 2, Gleneagles Hospital");
         specialtyFloorMap.put("ENT (Otorhinolaryngology)", "Level 3, Gleneagles Hospital");
@@ -101,14 +86,19 @@ public class QueueActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        List<String> specialties = new ArrayList<>(specialtyDoctorMap.keySet());
+        String[] specialties = {
+                "Cardiology", "ENT (Otorhinolaryngology)", "Orthopedic Surgery",
+                "Dermatology", "Pediatrics", "Obstetrics & Gynecology",
+                "Ophthalmology", "Gastroenterology", "Neurology",
+                "Psychiatry", "Dentistry", "General Surgery"
+        };
         ArrayAdapter<String> specialtyAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, specialties);
         spinnerSpecialty.setAdapter(specialtyAdapter);
 
         spinnerSpecialty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedSpecialty = specialties.get(position);
+                String selectedSpecialty = specialties[position];
                 updateDoctorSpinner(selectedSpecialty);
             }
 
@@ -118,11 +108,38 @@ public class QueueActivity extends AppCompatActivity {
     }
 
     private void updateDoctorSpinner(String specialty) {
-        String[] doctors = specialtyDoctorMap.get(specialty);
-        if (doctors != null) {
-            ArrayAdapter<String> doctorAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, doctors);
-            spinnerDoctor.setAdapter(doctorAdapter);
-        }
+        DatabaseReference usersRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("users");
+
+        usersRef.orderByChild("specialty").equalTo(specialty).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<String> doctors = new ArrayList<>();
+                if (snapshot.exists()) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        String role = ds.child("role").getValue(String.class);
+                        if (role != null && (role.contains("staff") || role.contains("admin"))) {
+                            String doctorName = ds.child("fullName").getValue(String.class);
+                            if (doctorName != null) {
+                                doctors.add(doctorName);
+                            }
+                        }
+                    }
+                }
+
+                if (doctors.isEmpty()) {
+                    doctors.add("No doctors available");
+                }
+
+                ArrayAdapter<String> doctorAdapter = new ArrayAdapter<>(QueueActivity.this, android.R.layout.simple_spinner_dropdown_item, doctors);
+                spinnerDoctor.setAdapter(doctorAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(QueueActivity.this, "Error fetching doctors", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void generateQueue() {
@@ -136,9 +153,14 @@ public class QueueActivity extends AppCompatActivity {
             return;
         }
 
+        String doctor = spinnerDoctor.getSelectedItem().toString();
+        if (doctor.equals("No doctors available")) {
+            Toast.makeText(this, "Cannot generate ticket: No doctor available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String userId = mAuth.getCurrentUser().getUid();
         String specialty = spinnerSpecialty.getSelectedItem().toString();
-        String doctor = spinnerDoctor.getSelectedItem().toString();
         String floor = specialtyFloorMap.get(specialty);
 
         queueRef.child("nextTicketNumber")
@@ -173,6 +195,9 @@ public class QueueActivity extends AppCompatActivity {
                                     
                                     // Also save a reference to the patient's own profile
                                     userRef.child("currentTicket").setValue(queueMap);
+
+                                    // Notify staff and admins
+                                    notifyStaffOfNewQueue(queueNumber, specialty, doctor);
                                 }
 
                                 queueRef.child("nextTicketNumber").setValue(nextNumber + 1);
@@ -194,5 +219,42 @@ public class QueueActivity extends AppCompatActivity {
                                 Toast.makeText(QueueActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
+    }
+
+    private void notifyStaffOfNewQueue(String queueNumber, String specialty, String doctor) {
+        DatabaseReference allUsersRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("users");
+
+        allUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                    String role = userSnapshot.child("role").getValue(String.class);
+                    if (role != null && (role.contains("staff") || role.contains("admin"))) {
+                        String staffId = userSnapshot.getKey();
+                        if (staffId != null) {
+                            DatabaseReference notifRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                                    .getReference("notifications").child(staffId);
+                            String notifId = notifRef.push().getKey();
+                            if (notifId != null) {
+                                NotificationModel notification = new NotificationModel(
+                                        notifId,
+                                        staffId,
+                                        "New Queue Ticket Generated",
+                                        "Ticket " + queueNumber + " generated for " + specialty + " (" + doctor + ").",
+                                        System.currentTimeMillis(),
+                                        "new_queue",
+                                        null
+                                );
+                                notifRef.child(notifId).setValue(notification);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 }

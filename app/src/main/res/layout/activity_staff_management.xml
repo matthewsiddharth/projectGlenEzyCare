@@ -95,10 +95,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="55dp"
                     android:background="@drawable/edittext_rounded"
-                    android:hint="Staff Role"
+                    android:hint="Staff Role (staff or admin)"
                     android:padding="15dp"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginBottom="16dp"
                     android:textColor="#333333"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Specialty (For Staff Doctors)"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="#666666"/>
+
+                <Spinner
+                    android:id="@+id/spinnerStaffSpecialty"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:background="@drawable/edittext_rounded"
+                    android:padding="15dp"
+                    android:layout_marginBottom="24dp"/>
 
                 <Button
                     android:id="@+id/btnAddStaff"

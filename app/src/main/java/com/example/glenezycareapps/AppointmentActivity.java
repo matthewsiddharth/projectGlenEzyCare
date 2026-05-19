@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class AppointmentActivity extends AppCompatActivity {
 
@@ -38,9 +37,6 @@ public class AppointmentActivity extends AppCompatActivity {
 
     DatabaseReference appointmentRef, userRef;
     String currentUserId, currentUserName;
-
-    // Map to store specialists for each specialty
-    private Map<String, String[]> specialtyDoctorMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +52,6 @@ public class AppointmentActivity extends AppCompatActivity {
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         appointmentRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("appointments");
         userRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("users").child(currentUserId);
-
-        // Initialize doctor data
-        initializeDoctorData();
 
         // Fetch current user's name
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -92,6 +85,11 @@ public class AppointmentActivity extends AppCompatActivity {
                 return;
             }
 
+            if (doctor.equals("No doctors available")) {
+                Toast.makeText(this, "Cannot book: No doctor available for this specialty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             HashMap<String, String> appointmentMap = new HashMap<>();
             appointmentMap.put("patientId", currentUserId);
             appointmentMap.put("patientName", currentUserName != null ? currentUserName : "Unknown Patient");
@@ -107,6 +105,7 @@ public class AppointmentActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         Toast.makeText(this, "Appointment Booked", Toast.LENGTH_SHORT).show();
                         sendBookingNotification(pushId, specialty, doctor, date, time);
+                        notifyStaffOfNewAppointment(pushId, specialty, doctor, date, time);
                         finish();
                     } else {
                         Toast.makeText(this, "Booking failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -118,43 +117,13 @@ public class AppointmentActivity extends AppCompatActivity {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
     }
 
-    private void sendBookingNotification(String appointmentId, String specialty, String doctor, String date, String time) {
-        DatabaseReference notifRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
-                .getReference("notifications").child(currentUserId);
-        
-        String notifId = notifRef.push().getKey();
-        if (notifId != null) {
-            NotificationModel notification = new NotificationModel(
-                    notifId,
-                    currentUserId,
-                    "Appointment Confirmed",
-                    "Your appointment for " + specialty + " with " + doctor + " on " + date + " at " + time + " is confirmed.",
-                    System.currentTimeMillis(),
-                    "booking",
-                    appointmentId
-            );
-            notifRef.child(notifId).setValue(notification);
-        }
-    }
-
-    private void initializeDoctorData() {
-        specialtyDoctorMap = new HashMap<>();
-        specialtyDoctorMap.put("Cardiology", new String[]{"Dr Ali (Cardiologist)", "Dr Sarah (Cardiologist)"});
-        specialtyDoctorMap.put("ENT (Otorhinolaryngology)", new String[]{"Dr John (ENT Specialist)", "Dr Lim (ENT Specialist)"});
-        specialtyDoctorMap.put("Orthopedic Surgery", new String[]{"Dr Siti (Orthopedic Surgeon)", "Dr Wong (Orthopedic Surgeon)"});
-        specialtyDoctorMap.put("Dermatology", new String[]{"Dr Tan (Dermatologist)", "Dr Kumar (Dermatologist)"});
-        specialtyDoctorMap.put("Pediatrics", new String[]{"Dr Raj (Pediatrician)", "Dr Low (Pediatrician)"});
-        specialtyDoctorMap.put("Obstetrics & Gynecology", new String[]{"Dr Ng (Gynecologist)", "Dr Ibrahim (Gynecologist)"});
-        specialtyDoctorMap.put("Ophthalmology", new String[]{"Dr Chen (Ophthalmologist)", "Dr Kumar (Ophthalmologist)"});
-        specialtyDoctorMap.put("Gastroenterology", new String[]{"Dr Gupta (Gastroenterologist)", "Dr Lopez (Gastroenterologist)"});
-        specialtyDoctorMap.put("Neurology", new String[]{"Dr White (Neurologist)", "Dr Black (Neurologist)"});
-        specialtyDoctorMap.put("Psychiatry", new String[]{"Dr Green (Psychiatrist)", "Dr Blue (Psychiatrist)"});
-        specialtyDoctorMap.put("Dentistry", new String[]{"Dr Smile (Dentist)", "Dr Tooth (Dentist)"});
-        specialtyDoctorMap.put("General Surgery", new String[]{"Dr Sharp (Surgeon)", "Dr Cut (Surgeon)"});
-    }
-
     private void setupSpinners() {
-        List<String> specialties = new ArrayList<>(specialtyDoctorMap.keySet());
+        String[] specialties = {
+                "Cardiology", "ENT (Otorhinolaryngology)", "Orthopedic Surgery",
+                "Dermatology", "Pediatrics", "Obstetrics & Gynecology",
+                "Ophthalmology", "Gastroenterology", "Neurology",
+                "Psychiatry", "Dentistry", "General Surgery"
+        };
         
         ArrayAdapter<String> specialtyAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, specialties);
         spinnerSpecialty.setAdapter(specialtyAdapter);
@@ -162,7 +131,7 @@ public class AppointmentActivity extends AppCompatActivity {
         spinnerSpecialty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedSpecialty = specialties.get(position);
+                String selectedSpecialty = specialties[position];
                 updateDoctorSpinner(selectedSpecialty);
             }
 
@@ -181,10 +150,93 @@ public class AppointmentActivity extends AppCompatActivity {
     }
 
     private void updateDoctorSpinner(String specialty) {
-        String[] doctors = specialtyDoctorMap.get(specialty);
-        if (doctors != null) {
-            ArrayAdapter<String> doctorAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, doctors);
-            spinnerDoctor.setAdapter(doctorAdapter);
+        DatabaseReference usersRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("users");
+        
+        usersRef.orderByChild("specialty").equalTo(specialty).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<String> doctors = new ArrayList<>();
+                if (snapshot.exists()) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        String role = ds.child("role").getValue(String.class);
+                        if (role != null && (role.contains("staff") || role.contains("admin"))) {
+                            String doctorName = ds.child("fullName").getValue(String.class);
+                            if (doctorName != null) {
+                                doctors.add(doctorName);
+                            }
+                        }
+                    }
+                }
+
+                if (doctors.isEmpty()) {
+                    doctors.add("No doctors available");
+                }
+
+                ArrayAdapter<String> doctorAdapter = new ArrayAdapter<>(AppointmentActivity.this, android.R.layout.simple_spinner_dropdown_item, doctors);
+                spinnerDoctor.setAdapter(doctorAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(AppointmentActivity.this, "Error fetching doctors", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void notifyStaffOfNewAppointment(String appointmentId, String specialty, String doctor, String date, String time) {
+        DatabaseReference usersRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("users");
+        
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                    String role = userSnapshot.child("role").getValue(String.class);
+                    if (role != null && (role.contains("staff") || role.contains("admin"))) {
+                        String staffId = userSnapshot.getKey();
+                        if (staffId != null) {
+                            DatabaseReference notifRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                                    .getReference("notifications").child(staffId);
+                            String notifId = notifRef.push().getKey();
+                            if (notifId != null) {
+                                NotificationModel notification = new NotificationModel(
+                                        notifId,
+                                        staffId,
+                                        "New Appointment Booking",
+                                        (currentUserName != null ? currentUserName : "A patient") + " booked for " + specialty + " with " + doctor + " on " + date + " at " + time + ".",
+                                        System.currentTimeMillis(),
+                                        "new_appointment",
+                                        appointmentId
+                                );
+                                notifRef.child(notifId).setValue(notification);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void sendBookingNotification(String appointmentId, String specialty, String doctor, String date, String time) {
+        DatabaseReference notifRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("notifications").child(currentUserId);
+        
+        String notifId = notifRef.push().getKey();
+        if (notifId != null) {
+            NotificationModel notification = new NotificationModel(
+                    notifId,
+                    currentUserId,
+                    "Appointment Confirmed",
+                    "Your appointment for " + specialty + " with " + doctor + " on " + date + " at " + time + " is confirmed.",
+                    System.currentTimeMillis(),
+                    "booking",
+                    appointmentId
+            );
+            notifRef.child(notifId).setValue(notification);
         }
     }
 

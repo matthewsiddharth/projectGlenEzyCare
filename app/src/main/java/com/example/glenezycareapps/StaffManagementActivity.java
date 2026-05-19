@@ -5,8 +5,10 @@
 package com.example.glenezycareapps;
 
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +21,7 @@ import java.util.HashMap;
 public class StaffManagementActivity extends AppCompatActivity {
 
     EditText etStaffName, etStaffEmail, etStaffRole;
+    Spinner spinnerStaffSpecialty;
     Button btnAddStaff;
     android.widget.ImageView btnBack;
 
@@ -32,6 +35,7 @@ public class StaffManagementActivity extends AppCompatActivity {
         etStaffName = findViewById(R.id.etStaffName);
         etStaffEmail = findViewById(R.id.etStaffEmail);
         etStaffRole = findViewById(R.id.etStaffRole);
+        spinnerStaffSpecialty = findViewById(R.id.spinnerStaffSpecialty);
 
         btnAddStaff = findViewById(R.id.btnAddStaff);
         btnBack = findViewById(R.id.btnBack);
@@ -39,6 +43,8 @@ public class StaffManagementActivity extends AppCompatActivity {
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
         }
+
+        setupSpecialtySpinner();
 
         // Use the common database path
         staffRef = FirebaseDatabase
@@ -48,10 +54,31 @@ public class StaffManagementActivity extends AppCompatActivity {
         btnAddStaff.setOnClickListener(v -> addStaff());
     }
 
+    private void setupSpecialtySpinner() {
+        String[] specialties = {
+                "None/Admin",
+                "Cardiology",
+                "ENT (Otorhinolaryngology)",
+                "Orthopedic Surgery",
+                "Dermatology",
+                "Pediatrics",
+                "Obstetrics & Gynecology",
+                "Ophthalmology",
+                "Gastroenterology",
+                "Neurology",
+                "Psychiatry",
+                "Dentistry",
+                "General Surgery"
+        };
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, specialties);
+        spinnerStaffSpecialty.setAdapter(adapter);
+    }
+
     private void addStaff() {
         String name = etStaffName.getText().toString().trim();
         String email = etStaffEmail.getText().toString().trim();
         String role = etStaffRole.getText().toString().trim().toLowerCase();
+        String specialty = spinnerStaffSpecialty.getSelectedItem().toString();
 
         if (name.isEmpty() || email.isEmpty() || role.isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
@@ -67,6 +94,7 @@ public class StaffManagementActivity extends AppCompatActivity {
         staffMap.put("fullName", name);
         staffMap.put("email", email);
         staffMap.put("role", role);
+        staffMap.put("specialty", specialty.equals("None/Admin") ? "" : specialty);
 
         // Push to a list of pre-approved staff
         staffRef.push().setValue(staffMap).addOnCompleteListener(task -> {
@@ -75,6 +103,7 @@ public class StaffManagementActivity extends AppCompatActivity {
                 etStaffName.setText("");
                 etStaffEmail.setText("");
                 etStaffRole.setText("");
+                spinnerStaffSpecialty.setSelection(0);
             } else {
                 Toast.makeText(this, "Error adding staff: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }

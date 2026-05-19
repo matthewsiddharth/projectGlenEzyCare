@@ -80,26 +80,30 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 String role = "patient"; // Default role
+                String specialty = "";
                 if (snapshot.exists()) {
                     // This email is pre-approved for a staff/admin role
                     for (DataSnapshot ds : snapshot.getChildren()) {
                         role = ds.child("role").getValue(String.class);
+                        specialty = ds.child("specialty").getValue(String.class);
                         if (role == null) role = "staff";
+                        if (specialty == null) specialty = "";
                     }
                 }
                 
                 final String finalRole = role;
-                createAuthUser(email, password, name, finalRole);
+                final String finalSpecialty = specialty;
+                createAuthUser(email, password, name, finalRole, finalSpecialty);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                createAuthUser(email, password, name, "patient");
+                createAuthUser(email, password, name, "patient", "");
             }
         });
     }
 
-    private void createAuthUser(String email, String password, String name, String role) {
+    private void createAuthUser(String email, String password, String name, String role, String specialty) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if(task.isSuccessful()) {
@@ -110,9 +114,15 @@ public class RegisterActivity extends AppCompatActivity {
                             userMap.put("fullName", name);
                             userMap.put("email", email);
                             userMap.put("role", role);
+                            if (!specialty.isEmpty()) {
+                                userMap.put("specialty", specialty);
+                            }
 
                             usersRef.child(userId).setValue(userMap).addOnCompleteListener(dbTask -> {
                                 if (dbTask.isSuccessful()) {
+                                    if (role.equals("staff") || role.equals("admin")) {
+                                        notifyAdminsOfNewStaff(name, role);
+                                    }
                                     sendVerificationEmail();
                                 } else {
                                     Toast.makeText(RegisterActivity.this, "Database Error: " + dbTask.getException().getMessage(), Toast.LENGTH_LONG).show();
@@ -123,6 +133,37 @@ public class RegisterActivity extends AppCompatActivity {
                         Toast.makeText(RegisterActivity.this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    private void notifyAdminsOfNewStaff(String staffName, String role) {
+        usersRef.orderByChild("role").equalTo("admin").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot adminSnapshot : snapshot.getChildren()) {
+                    String adminId = adminSnapshot.getKey();
+                    if (adminId != null) {
+                        DatabaseReference notifRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                                .getReference("notifications").child(adminId);
+                        String notifId = notifRef.push().getKey();
+                        if (notifId != null) {
+                            NotificationModel notification = new NotificationModel(
+                                    notifId,
+                                    adminId,
+                                    "New Staff Registered",
+                                    staffName + " has registered as " + role + ".",
+                                    System.currentTimeMillis(),
+                                    "staff_registration",
+                                    null
+                            );
+                            notifRef.child(notifId).setValue(notification);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 
     private void sendVerificationEmail() {
