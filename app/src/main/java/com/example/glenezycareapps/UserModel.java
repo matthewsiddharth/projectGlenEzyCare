@@ -7,18 +7,28 @@ public class UserModel {
     private String userId;
     private String phone;
     private String profilePic;
+    private String specialty;
 
     public UserModel() {
         // Required for Firebase
     }
 
-    public UserModel(String fullName, String email, String role, String userId, String phone, String profilePic) {
+    public UserModel(String fullName, String email, String role, String userId, String phone, String profilePic, String specialty) {
         this.fullName = fullName;
         this.email = email;
         this.role = role;
         this.userId = userId;
         this.phone = phone;
         this.profilePic = profilePic;
+        this.specialty = specialty;
+    }
+
+    public String getSpecialty() {
+        return specialty;
+    }
+
+    public void setSpecialty(String specialty) {
+        this.specialty = specialty;
     }
 
     public String getFullName() {

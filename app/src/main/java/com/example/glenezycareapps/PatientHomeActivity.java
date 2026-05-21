@@ -34,6 +34,7 @@ public class PatientHomeActivity extends AppCompatActivity {
 
     View btnQueue, btnQueueStatus, btnAppointment, btnHistory, cardUpcoming;
     TextView tvUserName, tvGreeting, tvHomeQueueNum, tvWaitTime, tvHomeConsultationRoom, btnSeeAll;
+    TextView tvUpcomingSpecialty, tvUpcomingDoctor, tvUpcomingDateTime;
     ImageView btnMenu, ivProfileTop, btnNotification;
     BottomNavigationView bottomNav;
     ProgressBar pbWait;
@@ -47,6 +48,8 @@ public class PatientHomeActivity extends AppCompatActivity {
     private long timeLeftInMillis;
     private String currentQueueNumber;
     private String currentSpecialty;
+    private String lastTimerQueueNum = "";
+    private boolean hasUpcomingAppointment = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +75,10 @@ public class PatientHomeActivity extends AppCompatActivity {
         bottomNav = findViewById(R.id.bottomNav);
         drawerLayout = findViewById(R.id.drawerLayout);
         
+        tvUpcomingSpecialty = findViewById(R.id.tvUpcomingSpecialty);
+        tvUpcomingDoctor = findViewById(R.id.tvUpcomingDoctor);
+        tvUpcomingDateTime = findViewById(R.id.tvUpcomingDateTime);
+        
         navHome = findViewById(R.id.navHome);
         navProfile = findViewById(R.id.navProfile);
         navAppointments = findViewById(R.id.navAppointments);
@@ -84,6 +91,7 @@ public class PatientHomeActivity extends AppCompatActivity {
             loadUserData();
             trackNowServing();
             checkAndGenerateReminders();
+            loadUpcomingAppointment();
         }
 
         btnQueue.setOnClickListener(v -> startActivity(new Intent(this, QueueActivity.class)));
@@ -91,7 +99,13 @@ public class PatientHomeActivity extends AppCompatActivity {
         btnAppointment.setOnClickListener(v -> startActivity(new Intent(this, AppointmentActivity.class)));
         btnHistory.setOnClickListener(v -> startActivity(new Intent(this, AppointmentHistoryActivity.class)));
         btnSeeAll.setOnClickListener(v -> startActivity(new Intent(this, AppointmentHistoryActivity.class)));
-        cardUpcoming.setOnClickListener(v -> startActivity(new Intent(this, AppointmentHistoryActivity.class)));
+        cardUpcoming.setOnClickListener(v -> {
+            if (hasUpcomingAppointment) {
+                startActivity(new Intent(this, AppointmentHistoryActivity.class));
+            } else {
+                startActivity(new Intent(this, AppointmentActivity.class));
+            }
+        });
 
         ivProfileTop.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         btnNotification.setOnClickListener(v -> startActivity(new Intent(this, NotificationActivity.class)));
@@ -166,7 +180,7 @@ public class PatientHomeActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // If nowServing changes, re-calculate wait time if ticket exists
-                if (currentQueueNumber != null && !currentQueueNumber.equals("None")) {
+                if (currentQueueNumber != null && currentSpecialty != null) {
                     calculateEstimatedWait(currentQueueNumber, currentSpecialty);
                 }
             }
@@ -179,8 +193,14 @@ public class PatientHomeActivity extends AppCompatActivity {
         if (myNumber == null || myNumber.isEmpty() || mySpecialty == null) return;
         
         try {
-            int myNumInt = Integer.parseInt(myNumber.substring(1));
-            rootRef.child("queue").child("nowServing").get().addOnCompleteListener(task -> {
+            int myNumInt;
+            if (myNumber.startsWith("Q") && !Character.isLetter(myNumber.charAt(1))) {
+                myNumInt = Integer.parseInt(myNumber.substring(1));
+            } else {
+                myNumInt = Integer.parseInt(myNumber.substring(3));
+            }
+
+            rootRef.child("queue").child("nowServing").child(mySpecialty).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful() && task.getResult().exists()) {
                     int nowServing = task.getResult().getValue(Integer.class);
                     
@@ -201,28 +221,39 @@ public class PatientHomeActivity extends AppCompatActivity {
                                 String spec = ds.child("specialty").getValue(String.class);
                                 
                                 if (qNumStr != null && spec != null && spec.equals(mySpecialty)) {
-                                    int qNum = Integer.parseInt(qNumStr.substring(1));
+                                    int qNum;
+                                    if (qNumStr.startsWith("Q") && !Character.isLetter(qNumStr.charAt(1))) {
+                                        qNum = Integer.parseInt(qNumStr.substring(1));
+                                    } else {
+                                        qNum = Integer.parseInt(qNumStr.substring(3));
+                                    }
+
                                     if (qNum > nowServing && qNum < myNumInt) {
                                         peopleAheadSameDept++;
                                     }
                                 }
                             }
 
-                            // Calculate wait time: 10 mins for each person ahead in the same specialty
-                            // Plus 10 mins for the current slot if it's the same specialty
-                            int waitTimeMinutes = (peopleAheadSameDept + 1) * 10;
+                            // Calculate wait time: 2 minutes per person ahead
+                            long millis = (long) (peopleAheadSameDept + 1) * 2 * 60 * 1000;
                             
-                            long millis = (long) waitTimeMinutes * 60 * 1000;
-                            startCountdown(millis);
-                            
-                            // Progress bar: assuming max 5 people in specialty queue for 100% scale
-                            int progress = Math.max(0, 100 - (peopleAheadSameDept * 20));
-                            pbWait.setProgress(progress);
+                            // Only start if not already counting for this specific ticket
+                            if (countDownTimer == null || !myNumber.equals(lastTimerQueueNum)) {
+                                lastTimerQueueNum = myNumber;
+                                startCountdown(millis);
+                            }
                         }
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {}
                     });
+                } else {
+                    // If no one is serving in this specialty yet, wait time is based on myNumInt
+                    long millis = (long) myNumInt * 2 * 60 * 1000;
+                    if (countDownTimer == null || !myNumber.equals(lastTimerQueueNum)) {
+                        lastTimerQueueNum = myNumber;
+                        startCountdown(millis);
+                    }
                 }
             });
         } catch (Exception e) {
@@ -235,26 +266,99 @@ public class PatientHomeActivity extends AppCompatActivity {
             countDownTimer.cancel();
         }
 
+        final long totalDuration = durationMillis;
+
         countDownTimer = new CountDownTimer(durationMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 timeLeftInMillis = millisUntilFinished;
                 updateCountdownText();
+                
+                // Update progress bar based on time
+                int progress = (int) (100 - (millisUntilFinished * 100 / totalDuration));
+                pbWait.setProgress(progress);
             }
 
             @Override
             public void onFinish() {
                 tvWaitTime.setText("NOW");
                 pbWait.setProgress(100);
+                sendTurnNotification();
             }
         }.start();
+    }
+
+    private void sendTurnNotification() {
+        if (mAuth.getCurrentUser() == null) return;
+        String uid = mAuth.getCurrentUser().getUid();
+        DatabaseReference notifRef = rootRef.child("notifications").child(uid);
+        String notifId = notifRef.push().getKey();
+        
+        if (notifId != null) {
+            NotificationModel turnNotif = new NotificationModel(
+                    notifId,
+                    uid,
+                    "It's Your Turn!",
+                    "Your wait time has ended. Please proceed to the consultation room.",
+                    System.currentTimeMillis(),
+                    "turn_alert",
+                    null
+            );
+            notifRef.child(notifId).setValue(turnNotif);
+        }
     }
 
     private void updateCountdownText() {
         int minutes = (int) (timeLeftInMillis / 1000) / 60;
         int seconds = (int) (timeLeftInMillis / 1000) % 60;
         String timeFormatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
-        tvWaitTime.setText(timeFormatted + "\nmin");
+        tvWaitTime.setText(timeFormatted + " min");
+    }
+
+    private void loadUpcomingAppointment() {
+        String uid = mAuth.getCurrentUser().getUid();
+        rootRef.child("appointments").orderByChild("patientId").equalTo(uid)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        AppointmentModel soonest = null;
+                        long soonestTime = Long.MAX_VALUE;
+                        SimpleDateFormat sdf = new SimpleDateFormat("d/M/yyyy - hh:mm a", Locale.getDefault());
+                        
+                        Date now = new Date();
+                        
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            AppointmentModel appointment = ds.getValue(AppointmentModel.class);
+                            if (appointment != null && "Pending".equals(appointment.getStatus())) {
+                                try {
+                                    Date apptDate = sdf.parse(appointment.getDate() + " - " + appointment.getTime());
+                                    if (apptDate != null && apptDate.getTime() < soonestTime && apptDate.after(now)) {
+                                        soonestTime = apptDate.getTime();
+                                        soonest = appointment;
+                                    }
+                                } catch (ParseException e) {
+                                    // Fallback if time format is slightly different
+                                }
+                            }
+                        }
+                        
+                        if (soonest != null) {
+                            hasUpcomingAppointment = true;
+                            tvUpcomingSpecialty.setText(soonest.getSpecialty());
+                            tvUpcomingDoctor.setText(soonest.getDoctor());
+                            tvUpcomingDateTime.setText(soonest.getDate() + " - " + soonest.getTime());
+                            cardUpcoming.setVisibility(View.VISIBLE);
+                        } else {
+                            hasUpcomingAppointment = false;
+                            tvUpcomingSpecialty.setText("No upcoming appointment");
+                            tvUpcomingDoctor.setText("Click to book now");
+                            tvUpcomingDateTime.setText("");
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {}
+                });
     }
 
     @Override

@@ -29,7 +29,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Patient Records"
+        android:text="Staff List"
         android:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -64,23 +64,11 @@
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvPatientRecords"
+        android:id="@+id/rvStaffList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/filterContainer"
-        tools:listitem="@android:layout/simple_list_item_2" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddRecord"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="24dp"
-        android:src="@android:drawable/ic_input_add"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@color/white"
-        android:contentDescription="Add Patient" />
+        app:layout_constraintTop_toBottomOf="@+id/filterContainer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

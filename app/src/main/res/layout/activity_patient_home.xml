@@ -153,6 +153,18 @@
                             app:layout_constraintTop_toBottomOf="@+id/tvLabelQueue" />
 
                         <TextView
+                            android:id="@+id/tvWaitTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end"
+                            android:text="15 min"
+                            android:textColor="#1976D2"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
                             android:id="@+id/tvHomeConsultationRoom"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -167,6 +179,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
+                            android:layout_marginBottom="16dp"
                             android:text="● Updated just now"
                             android:textColor="#4CAF50"
                             android:textSize="12sp"
@@ -176,27 +189,14 @@
                         <ProgressBar
                             android:id="@+id/pbWait"
                             style="?android:attr/progressBarStyleHorizontal"
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
+                            android:layout_width="0dp"
+                            android:layout_height="6dp"
+                            android:layout_marginTop="8dp"
                             android:progress="75"
-                            android:progressDrawable="@android:drawable/progress_horizontal"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <TextView
-                            android:id="@+id/tvWaitTime"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:text="15\nmin"
-                            android:textColor="#1976D2"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            app:layout_constraintBottom_toBottomOf="@+id/pbWait"
-                            app:layout_constraintEnd_toEndOf="@+id/pbWait"
-                            app:layout_constraintStart_toStartOf="@+id/pbWait"
-                            app:layout_constraintTop_toTopOf="@+id/pbWait" />
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/tvHomeQueueStatus" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>

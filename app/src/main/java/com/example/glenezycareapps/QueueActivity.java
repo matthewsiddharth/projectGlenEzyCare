@@ -36,6 +36,7 @@ public class QueueActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
 
     private Map<String, String> specialtyFloorMap;
+    private Map<String, String> specialtyPrefixMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +65,7 @@ public class QueueActivity extends AppCompatActivity {
         }
 
         initializeFloorData();
+        initializePrefixData();
         setupSpinners();
 
         btnGenerateQueue.setOnClickListener(v -> generateQueue());
@@ -83,6 +85,22 @@ public class QueueActivity extends AppCompatActivity {
         specialtyFloorMap.put("Psychiatry", "Level 6, Gleneagles Hospital");
         specialtyFloorMap.put("Dentistry", "Level 3, Gleneagles Hospital");
         specialtyFloorMap.put("General Surgery", "Level 4, Gleneagles Hospital");
+    }
+
+    private void initializePrefixData() {
+        specialtyPrefixMap = new HashMap<>();
+        specialtyPrefixMap.put("Cardiology", "CAR");
+        specialtyPrefixMap.put("ENT (Otorhinolaryngology)", "ENT");
+        specialtyPrefixMap.put("Orthopedic Surgery", "ORT");
+        specialtyPrefixMap.put("Dermatology", "DER");
+        specialtyPrefixMap.put("Pediatrics", "PED");
+        specialtyPrefixMap.put("Obstetrics & Gynecology", "OBS");
+        specialtyPrefixMap.put("Ophthalmology", "OPH");
+        specialtyPrefixMap.put("Gastroenterology", "GAS");
+        specialtyPrefixMap.put("Neurology", "NEU");
+        specialtyPrefixMap.put("Psychiatry", "PSY");
+        specialtyPrefixMap.put("Dentistry", "DEN");
+        specialtyPrefixMap.put("General Surgery", "GEN");
     }
 
     private void setupSpinners() {
@@ -162,8 +180,10 @@ public class QueueActivity extends AppCompatActivity {
         String userId = mAuth.getCurrentUser().getUid();
         String specialty = spinnerSpecialty.getSelectedItem().toString();
         String floor = specialtyFloorMap.get(specialty);
+        String prefix = specialtyPrefixMap.getOrDefault(specialty, "Q");
 
-        queueRef.child("nextTicketNumber")
+        // Use specialty-specific counter
+        queueRef.child("nextTicketNumber").child(specialty)
                 .addListenerForSingleValueEvent(
                         new ValueEventListener() {
 
@@ -177,7 +197,7 @@ public class QueueActivity extends AppCompatActivity {
                                     nextNumber = snapshot.getValue(Integer.class);
                                 }
 
-                                String queueNumber = "Q" + String.format("%03d", nextNumber);
+                                String queueNumber = prefix + String.format("%03d", nextNumber);
 
                                 HashMap<String, Object> queueMap = new HashMap<>();
                                 queueMap.put("queueNumber", queueNumber);
@@ -200,7 +220,7 @@ public class QueueActivity extends AppCompatActivity {
                                     notifyStaffOfNewQueue(queueNumber, specialty, doctor);
                                 }
 
-                                queueRef.child("nextTicketNumber").setValue(nextNumber + 1);
+                                queueRef.child("nextTicketNumber").child(specialty).setValue(nextNumber + 1);
 
                                 Toast.makeText(
                                         QueueActivity.this,

@@ -28,6 +28,8 @@ public class QueueStatusActivity extends AppCompatActivity {
     DatabaseReference userRef;
     FirebaseAuth mAuth;
 
+    private String currentTicketSpecialty = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,25 +59,53 @@ public class QueueStatusActivity extends AppCompatActivity {
             });
         }
 
-        loadNowServing();
+        setupNowServingListener();
         loadUserTicket();
     }
 
-    private void loadNowServing() {
+    private void setupNowServingListener() {
         queueRef.child("nowServing").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Integer current = snapshot.getValue(Integer.class);
-                if (current != null) {
-                    tvCurrentQueue.setText("Q" + String.format("%03d", current));
+                Integer current = 0;
+                String prefix = "Q";
+
+                if (currentTicketSpecialty != null && snapshot.hasChild(currentTicketSpecialty)) {
+                    current = snapshot.child(currentTicketSpecialty).getValue(Integer.class);
+                    prefix = getPrefixForSpecialty(currentTicketSpecialty);
+                } else if (snapshot.getValue() instanceof Integer) {
+                    current = snapshot.getValue(Integer.class);
+                }
+                
+                if (current != null && current > 0) {
+                    tvCurrentQueue.setText(prefix + String.format("%03d", current));
                 } else {
-                    tvCurrentQueue.setText("Q000");
+                    tvCurrentQueue.setText(prefix + "000");
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
         });
+    }
+
+    private String getPrefixForSpecialty(String specialty) {
+        if (specialty == null) return "Q";
+        switch (specialty) {
+            case "Cardiology": return "CAR";
+            case "ENT (Otorhinolaryngology)": return "ENT";
+            case "Orthopedic Surgery": return "ORT";
+            case "Dermatology": return "DER";
+            case "Pediatrics": return "PED";
+            case "Obstetrics & Gynecology": return "OBS";
+            case "Ophthalmology": return "OPH";
+            case "Gastroenterology": return "GAS";
+            case "Neurology": return "NEU";
+            case "Psychiatry": return "PSY";
+            case "Dentistry": return "DEN";
+            case "General Surgery": return "GEN";
+            default: return "Q";
+        }
     }
 
     private void loadUserTicket() {
@@ -95,6 +125,8 @@ public class QueueStatusActivity extends AppCompatActivity {
                     String specialty = snapshot.child("specialty").getValue(String.class);
                     String floor = snapshot.child("floor").getValue(String.class);
 
+                    currentTicketSpecialty = specialty;
+
                     if (queueNumber != null) {
                         cardYourTicket.setVisibility(View.VISIBLE);
                         tvYourQueueNumber.setText(queueNumber);
@@ -105,6 +137,7 @@ public class QueueStatusActivity extends AppCompatActivity {
                         tvYourFloor.setText("Location: " + (floor != null ? floor : "---"));
                     }
                 } else {
+                    currentTicketSpecialty = null;
                     cardYourTicket.setVisibility(View.GONE);
                 }
             }

@@ -24,12 +24,17 @@ import com.google.firebase.database.ValueEventListener;
 public class StaffDashboardActivity extends AppCompatActivity {
 
     View btnCallQueue, btnPatientRecords, btnAppointments;
+    View cardStaffCurrentQueue, cardStaffPatientsWaiting;
     LinearLayout btnLogout, llLiveQueueList, navDashboard, navQueue, navPatients;
     TextView tvStaffName, tvStaffCurrentQueue, tvStaffWaitingCount;
-    ImageView ivStaffProfile, btnMenu;
+    ImageView ivStaffProfile, btnMenu, btnNotification;
     DrawerLayout drawerLayout;
 
     DatabaseReference rootRef;
+    private int currentNowServing = 0;
+    private DataSnapshot lastTicketsSnapshot;
+    private String staffSpecialty = null;
+    private String staffRole = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +44,8 @@ public class StaffDashboardActivity extends AppCompatActivity {
         btnCallQueue = findViewById(R.id.btnCallQueue);
         btnPatientRecords = findViewById(R.id.btnPatientRecords);
         btnAppointments = findViewById(R.id.btnAppointments);
+        cardStaffCurrentQueue = findViewById(R.id.cardStaffCurrentQueue);
+        cardStaffPatientsWaiting = findViewById(R.id.cardStaffPatientsWaiting);
         btnLogout = findViewById(R.id.btnLogout);
         navDashboard = findViewById(R.id.navDashboard);
         navQueue = findViewById(R.id.navQueue);
@@ -46,6 +53,7 @@ public class StaffDashboardActivity extends AppCompatActivity {
         
         tvStaffName = findViewById(R.id.tvStaffName);
         ivStaffProfile = findViewById(R.id.ivStaffProfile);
+        btnNotification = findViewById(R.id.btnNotification);
         btnMenu = findViewById(R.id.btnMenu);
         drawerLayout = findViewById(R.id.drawerLayout);
         tvStaffCurrentQueue = findViewById(R.id.tvStaffCurrentQueue);
@@ -57,16 +65,35 @@ public class StaffDashboardActivity extends AppCompatActivity {
         fetchStaffData();
         fetchRealTimeQueue();
 
-        btnCallQueue.setOnClickListener(v -> startActivity(new Intent(this, QueueCallingActivity.class)));
+        btnCallQueue.setOnClickListener(v -> {
+            Intent intent = new Intent(this, QueueCallingActivity.class);
+            intent.putExtra("specialty", staffSpecialty);
+            startActivity(intent);
+        });
         btnPatientRecords.setOnClickListener(v -> startActivity(new Intent(this, PatientRecordsActivity.class)));
         btnAppointments.setOnClickListener(v -> startActivity(new Intent(this, AppointmentManagementActivity.class)));
+        
+        cardStaffCurrentQueue.setOnClickListener(v -> {
+            Intent intent = new Intent(this, QueueCallingActivity.class);
+            intent.putExtra("specialty", staffSpecialty);
+            startActivity(intent);
+        });
+        cardStaffPatientsWaiting.setOnClickListener(v -> {
+            Intent intent = new Intent(this, QueueCallingActivity.class);
+            intent.putExtra("specialty", staffSpecialty);
+            startActivity(intent);
+        });
+
         btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
         ivStaffProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        btnNotification.setOnClickListener(v -> startActivity(new Intent(this, NotificationActivity.class)));
 
         navDashboard.setOnClickListener(v -> drawerLayout.closeDrawer(GravityCompat.START));
         navQueue.setOnClickListener(v -> {
             drawerLayout.closeDrawer(GravityCompat.START);
-            startActivity(new Intent(this, QueueCallingActivity.class));
+            Intent intent = new Intent(this, QueueCallingActivity.class);
+            intent.putExtra("specialty", staffSpecialty);
+            startActivity(intent);
         });
         navPatients.setOnClickListener(v -> {
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -91,10 +118,16 @@ public class StaffDashboardActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     String name = snapshot.child("fullName").getValue(String.class);
                     String profilePic = snapshot.child("profilePic").getValue(String.class);
+                    staffSpecialty = snapshot.child("specialty").getValue(String.class);
+                    staffRole = snapshot.child("role").getValue(String.class);
+
                     if (name != null) tvStaffName.setText(name);
                     if (profilePic != null && !profilePic.isEmpty() && !isDestroyed()) {
                         Glide.with(StaffDashboardActivity.this).load(profilePic).placeholder(R.drawable.iconprofile).into(ivStaffProfile);
                     }
+                    
+                    // Refresh UI once we have staff specialty
+                    updateWaitingListUI();
                 }
             }
             @Override
@@ -107,12 +140,25 @@ public class StaffDashboardActivity extends AppCompatActivity {
         rootRef.child("queue").child("nowServing").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Integer current = snapshot.getValue(Integer.class);
-                if (current != null && current > 0) {
-                    tvStaffCurrentQueue.setText("Q" + String.format("%03d", current));
+                Integer current;
+                if (staffSpecialty != null && snapshot.hasChild(staffSpecialty)) {
+                    current = snapshot.child(staffSpecialty).getValue(Integer.class);
+                } else if (snapshot.getValue() instanceof Integer) {
+                    current = snapshot.getValue(Integer.class);
+                } else {
+                    current = 0;
+                }
+
+                currentNowServing = (current != null) ? current : 0;
+                
+                String prefix = (staffSpecialty != null) ? getPrefixForSpecialty(staffSpecialty) : "Q";
+                
+                if (currentNowServing > 0) {
+                    tvStaffCurrentQueue.setText(prefix + String.format("%03d", currentNowServing));
                 } else {
                     tvStaffCurrentQueue.setText("---");
                 }
+                updateWaitingListUI();
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
@@ -122,30 +168,80 @@ public class StaffDashboardActivity extends AppCompatActivity {
         rootRef.child("queue").child("tickets").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                long count = snapshot.getChildrenCount();
-                tvStaffWaitingCount.setText(String.valueOf(count));
-
-                llLiveQueueList.removeAllViews();
-                if (count == 0) {
-                    TextView empty = new TextView(StaffDashboardActivity.this);
-                    empty.setText("No patients waiting");
-                    empty.setPadding(30, 30, 30, 30);
-                    llLiveQueueList.addView(empty);
-                } else {
-                    int displayed = 0;
-                    for (DataSnapshot ds : snapshot.getChildren()) {
-                        if (displayed >= 5) break;
-                        String qNum = ds.child("queueNumber").getValue(String.class);
-                        String userId = ds.child("userId").getValue(String.class);
-                        
-                        addQueueItemToView(qNum, userId);
-                        displayed++;
-                    }
-                }
+                lastTicketsSnapshot = snapshot;
+                updateWaitingListUI();
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
         });
+    }
+
+    private String getPrefixForSpecialty(String specialty) {
+        if (specialty == null) return "Q";
+        switch (specialty) {
+            case "Cardiology": return "CAR";
+            case "ENT (Otorhinolaryngology)": return "ENT";
+            case "Orthopedic Surgery": return "ORT";
+            case "Dermatology": return "DER";
+            case "Pediatrics": return "PED";
+            case "Obstetrics & Gynecology": return "OBS";
+            case "Ophthalmology": return "OPH";
+            case "Gastroenterology": return "GAS";
+            case "Neurology": return "NEU";
+            case "Psychiatry": return "PSY";
+            case "Dentistry": return "DEN";
+            case "General Surgery": return "GEN";
+            default: return "Q";
+        }
+    }
+
+    private void updateWaitingListUI() {
+        if (lastTicketsSnapshot == null) return;
+
+        llLiveQueueList.removeAllViews();
+        int waitingCount = 0;
+        int displayed = 0;
+
+        for (DataSnapshot ds : lastTicketsSnapshot.getChildren()) {
+            String qNumStr = ds.child("queueNumber").getValue(String.class);
+            String ticketSpecialty = ds.child("specialty").getValue(String.class);
+            String status = ds.child("status").getValue(String.class);
+
+            if (qNumStr != null && qNumStr.length() >= 4) {
+                try {
+                    // Logic: 
+                    // 1. Only show tickets matching their specialty. 
+                    // 2. Only show tickets that are "Waiting"
+                    // 3. Admin sees everything.
+                    
+                    boolean isMySpecialty = (staffRole != null && staffRole.equals("admin")) || 
+                                           (staffSpecialty != null && staffSpecialty.equals(ticketSpecialty));
+
+                    boolean isWaiting = "Waiting".equals(status);
+
+                    if (isMySpecialty && isWaiting) {
+                        waitingCount++;
+                        if (displayed < 5) {
+                            String userId = ds.child("userId").getValue(String.class);
+                            addQueueItemToView(qNumStr, userId);
+                            displayed++;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        tvStaffWaitingCount.setText(String.valueOf(waitingCount));
+
+        if (waitingCount == 0) {
+            TextView empty = new TextView(StaffDashboardActivity.this);
+            empty.setText("No patients waiting");
+            empty.setPadding(30, 30, 30, 30);
+            empty.setGravity(android.view.Gravity.CENTER);
+            llLiveQueueList.addView(empty);
+        }
     }
 
     private void addQueueItemToView(String number, String userId) {

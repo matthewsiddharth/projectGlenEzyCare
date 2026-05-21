@@ -15,6 +15,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GlenEzyCareApps">
         <activity
+            android:name=".StaffListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminListActivity"
+            android:exported="false" />
+        <activity
             android:name=".ForgotPasswordActivity"
             android:exported="false" />
         <activity
@@ -62,6 +68,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".NotificationActivity"
+            android:exported="false" />
         <activity
             android:name=".PatientHomeActivity"
             android:exported="false" />

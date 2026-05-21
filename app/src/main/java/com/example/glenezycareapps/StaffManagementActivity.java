@@ -4,6 +4,7 @@
 
 package com.example.glenezycareapps;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -22,7 +23,7 @@ public class StaffManagementActivity extends AppCompatActivity {
 
     EditText etStaffName, etStaffEmail, etStaffRole;
     Spinner spinnerStaffSpecialty;
-    Button btnAddStaff;
+    Button btnAddStaff, btnViewStaff;
     android.widget.ImageView btnBack;
 
     DatabaseReference staffRef;
@@ -38,6 +39,7 @@ public class StaffManagementActivity extends AppCompatActivity {
         spinnerStaffSpecialty = findViewById(R.id.spinnerStaffSpecialty);
 
         btnAddStaff = findViewById(R.id.btnAddStaff);
+        btnViewStaff = findViewById(R.id.btnViewStaff);
         btnBack = findViewById(R.id.btnBack);
 
         if (btnBack != null) {
@@ -52,6 +54,7 @@ public class StaffManagementActivity extends AppCompatActivity {
                 .getReference("staff");
 
         btnAddStaff.setOnClickListener(v -> addStaff());
+        btnViewStaff.setOnClickListener(v -> startActivity(new Intent(this, StaffListActivity.class)));
     }
 
     private void setupSpecialtySpinner() {
