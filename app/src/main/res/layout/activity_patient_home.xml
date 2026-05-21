@@ -11,12 +11,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Top Blue Header -->
-        <View
-            android:id="@+id/viewHeader"
+        <!-- Background Image -->
+        <ImageView
             android:layout_width="match_parent"
-            android:layout_height="220dp"
-            android:background="@drawable/patient_header_gradient"
+            android:layout_height="match_parent"
+            android:src="@drawable/patient_home_bg"
+            android:scaleType="centerCrop"
+            android:alpha="0.75"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Soft Overlay for the top section -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:background="@drawable/soft_top_overlay"
             app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Top Bar: Menu, Notification, Profile -->
@@ -30,7 +41,7 @@
             android:src="@android:drawable/ic_menu_sort_by_size"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/white" />
+            app:tint="#333333" />
 
         <ImageView
             android:id="@+id/btnNotification"
@@ -42,7 +53,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/ivProfileTop"
             app:layout_constraintEnd_toStartOf="@+id/ivProfileTop"
             app:layout_constraintTop_toTopOf="@+id/ivProfileTop"
-            app:tint="@color/white" />
+            app:tint="#757575" />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/ivProfileTop"
@@ -51,7 +62,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:src="@drawable/iconprofile"
-            app:civ_border_color="@color/white"
+            app:civ_border_color="#1976D2"
             app:civ_border_width="1dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -64,7 +75,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="20dp"
             android:text="Good morning,"
-            android:textColor="#E3F2FD"
+            android:textColor="#757575"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btnMenu" />
@@ -74,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="User Name"
-            android:textColor="@color/white"
+            android:textColor="#333333"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/tvGreeting"
@@ -85,7 +96,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Welcome to GlenEzyCare"
-            android:textColor="#E3F2FD"
+            android:textColor="#757575"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@+id/tvUserName"
             app:layout_constraintTop_toBottomOf="@+id/tvUserName" />

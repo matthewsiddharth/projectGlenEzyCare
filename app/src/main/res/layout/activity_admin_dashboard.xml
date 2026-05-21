@@ -11,6 +11,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!-- Background Image -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/admin_dashboard_bg"
+            android:scaleType="centerCrop"
+            android:alpha="0.8"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Soft Overlay for the top section -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:background="@drawable/soft_top_overlay"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
