@@ -141,16 +141,37 @@ public class PatientRecordsActivity extends AppCompatActivity {
     private void fetchPatientsInDept(String dept) {
         DatabaseReference ticketsRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
                 .getReference("queue/tickets");
+        DatabaseReference appointmentRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("appointments");
         
+        patientIdsInDept.clear();
+
+        // 1. Get patients from Queue Tickets
         ticketsRef.orderByChild("specialty").equalTo(dept).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                patientIdsInDept.clear();
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     String uid = ds.child("userId").getValue(String.class);
                     if (uid != null) patientIdsInDept.add(uid);
                 }
-                fetchPatients();
+                
+                // 2. Get patients from Appointments
+                appointmentRef.orderByChild("specialty").equalTo(dept).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            String uid = ds.child("patientId").getValue(String.class);
+                            if (uid != null) patientIdsInDept.add(uid);
+                        }
+                        // Finally fetch the user objects
+                        fetchPatients();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        fetchPatients();
+                    }
+                });
             }
 
             @Override
