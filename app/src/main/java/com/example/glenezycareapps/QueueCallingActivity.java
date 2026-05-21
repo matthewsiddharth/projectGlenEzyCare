@@ -5,7 +5,11 @@
 package com.example.glenezycareapps;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,9 +22,11 @@ public class QueueCallingActivity extends AppCompatActivity {
 
     TextView tvCurrentQueue, tvCallingDoctor, tvCallingSpecialty;
     Button btnCallNext, btnCompleteQueue;
+    Spinner spinnerAdminDept;
     android.widget.ImageView btnBack;
 
     DatabaseReference queueRef;
+    ValueEventListener nowServingListener;
     private String selectedSpecialty = null;
     private String specialtyPrefix = "Q";
 
@@ -34,6 +40,7 @@ public class QueueCallingActivity extends AppCompatActivity {
         tvCurrentQueue = findViewById(R.id.tvCurrentQueue);
         tvCallingDoctor = findViewById(R.id.tvCallingDoctor);
         tvCallingSpecialty = findViewById(R.id.tvCallingSpecialty);
+        spinnerAdminDept = findViewById(R.id.spinnerAdminDept);
 
         btnCallNext = findViewById(R.id.btnCallNext);
         btnCompleteQueue = findViewById(R.id.btnCompleteQueue);
@@ -49,15 +56,47 @@ public class QueueCallingActivity extends AppCompatActivity {
         if (selectedSpecialty != null) {
             specialtyPrefix = getPrefixForSpecialty(selectedSpecialty);
             tvCallingSpecialty.setText("Dept: " + selectedSpecialty);
+            loadCurrentQueueStatus();
         } else {
-            tvCallingSpecialty.setText("Dept: ALL (Admin Mode)");
+            tvCallingSpecialty.setText("Select Dept to Manage:");
+            setupAdminDeptSelector();
         }
 
         btnCallNext.setOnClickListener(v -> callNextQueue());
         
         btnCompleteQueue.setOnClickListener(v -> completeCurrentServing());
+    }
 
-        loadCurrentQueueStatus();
+    private void setupAdminDeptSelector() {
+        spinnerAdminDept.setVisibility(View.VISIBLE);
+        String[] depts = {
+                "Select Department", "Cardiology", "ENT (Otorhinolaryngology)",
+                "Orthopedic Surgery", "Dermatology", "Pediatrics",
+                "Obstetrics & Gynecology", "Ophthalmology", "Gastroenterology",
+                "Neurology", "Psychiatry", "Dentistry", "General Surgery"
+        };
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, depts);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerAdminDept.setAdapter(adapter);
+
+        spinnerAdminDept.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position > 0) {
+                    selectedSpecialty = depts[position];
+                    specialtyPrefix = getPrefixForSpecialty(selectedSpecialty);
+                    loadCurrentQueueStatus();
+                } else {
+                    selectedSpecialty = null;
+                    tvCurrentQueue.setText("Q000");
+                    tvCallingDoctor.setText("Select a department");
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 
     private String getPrefixForSpecialty(String specialty) {
@@ -79,11 +118,13 @@ public class QueueCallingActivity extends AppCompatActivity {
     }
 
     private void loadCurrentQueueStatus() {
-        DatabaseReference targetRef = (selectedSpecialty != null) 
-            ? queueRef.child("nowServing").child(selectedSpecialty)
-            : queueRef.child("nowServing");
+        if (selectedSpecialty == null) return;
 
-        targetRef.addValueEventListener(new ValueEventListener() {
+        if (nowServingListener != null) {
+            queueRef.child("nowServing").child(selectedSpecialty).removeEventListener(nowServingListener);
+        }
+
+        nowServingListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Integer current = snapshot.getValue(Integer.class);
@@ -94,13 +135,14 @@ public class QueueCallingActivity extends AppCompatActivity {
                 } else {
                     tvCurrentQueue.setText(specialtyPrefix + "000");
                     tvCallingDoctor.setText("No one being served");
-                    if (selectedSpecialty == null) tvCallingSpecialty.setText("---");
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
-        });
+        };
+
+        queueRef.child("nowServing").child(selectedSpecialty).addValueEventListener(nowServingListener);
     }
 
     private void fetchTicketDetails(String queueNum) {

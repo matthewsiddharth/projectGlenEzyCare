@@ -6,6 +6,9 @@ package com.example.glenezycareapps;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,12 +26,15 @@ public class QueueStatusActivity extends AppCompatActivity {
     CardView cardYourTicket;
     android.widget.ImageView btnBack;
     android.widget.Button btnRefreshQueue;
+    Spinner spinnerQueueFilter;
 
     DatabaseReference queueRef;
     DatabaseReference userRef;
     FirebaseAuth mAuth;
+    ValueEventListener nowServingListener;
 
     private String currentTicketSpecialty = null;
+    private String userRole = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +47,7 @@ public class QueueStatusActivity extends AppCompatActivity {
         tvYourDoctor = findViewById(R.id.tvYourDoctor);
         tvYourSpecialty = findViewById(R.id.tvYourSpecialty);
         tvYourFloor = findViewById(R.id.tvYourFloor);
+        spinnerQueueFilter = findViewById(R.id.spinnerQueueFilter);
         
         cardYourTicket = findViewById(R.id.cardYourTicket);
         btnBack = findViewById(R.id.btnBack);
@@ -59,19 +66,74 @@ public class QueueStatusActivity extends AppCompatActivity {
             });
         }
 
-        setupNowServingListener();
+        checkUserRole();
         loadUserTicket();
     }
 
+    private void checkUserRole() {
+        if (mAuth.getCurrentUser() == null) return;
+        String uid = mAuth.getCurrentUser().getUid();
+        FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("users").child(uid).child("role").get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        userRole = task.getResult().getValue(String.class);
+                        if ("admin".equals(userRole)) {
+                            setupAdminFilter();
+                        } else {
+                            setupNowServingListener();
+                        }
+                    }
+                });
+    }
+
+    private void setupAdminFilter() {
+        spinnerQueueFilter.setVisibility(View.VISIBLE);
+        String[] depts = {
+                "Select Department", "Cardiology", "ENT (Otorhinolaryngology)",
+                "Orthopedic Surgery", "Dermatology", "Pediatrics",
+                "Obstetrics & Gynecology", "Ophthalmology", "Gastroenterology",
+                "Neurology", "Psychiatry", "Dentistry", "General Surgery"
+        };
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, depts);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerQueueFilter.setAdapter(adapter);
+
+        spinnerQueueFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position > 0) {
+                    currentTicketSpecialty = depts[position];
+                    setupNowServingListener();
+                } else {
+                    currentTicketSpecialty = null;
+                    tvCurrentQueue.setText("Q000");
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
     private void setupNowServingListener() {
-        queueRef.child("nowServing").addValueEventListener(new ValueEventListener() {
+        if (nowServingListener != null && currentTicketSpecialty != null) {
+            queueRef.child("nowServing").child(currentTicketSpecialty).removeEventListener(nowServingListener);
+        }
+
+        nowServingListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Integer current = 0;
                 String prefix = "Q";
 
-                if (currentTicketSpecialty != null && snapshot.hasChild(currentTicketSpecialty)) {
-                    current = snapshot.child(currentTicketSpecialty).getValue(Integer.class);
+                if (currentTicketSpecialty != null) {
+                    // If we are filtering by specialty
+                    if (snapshot.hasChild(currentTicketSpecialty)) {
+                        current = snapshot.child(currentTicketSpecialty).getValue(Integer.class);
+                    } else if (snapshot.getKey().equals(currentTicketSpecialty)) {
+                        current = snapshot.getValue(Integer.class);
+                    }
                     prefix = getPrefixForSpecialty(currentTicketSpecialty);
                 } else if (snapshot.getValue() instanceof Integer) {
                     current = snapshot.getValue(Integer.class);
@@ -86,7 +148,13 @@ public class QueueStatusActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
-        });
+        };
+
+        if (currentTicketSpecialty != null) {
+            queueRef.child("nowServing").child(currentTicketSpecialty).addValueEventListener(nowServingListener);
+        } else {
+            queueRef.child("nowServing").addValueEventListener(nowServingListener);
+        }
     }
 
     private String getPrefixForSpecialty(String specialty) {
