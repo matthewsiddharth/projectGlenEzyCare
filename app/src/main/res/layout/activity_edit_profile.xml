@@ -157,7 +157,7 @@
                     android:layout_height="60dp"
                     android:background="@drawable/button_outline"
                     android:text="CHANGE PASSWORD"
-                    android:textColor="#333333"
+                    android:textColor="@color/white"
                     android:textStyle="bold" />
 
             </LinearLayout>
