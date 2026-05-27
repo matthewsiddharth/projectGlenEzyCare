@@ -18,8 +18,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class AppointmentManagementActivity extends AppCompatActivity {
     private RecyclerView rvAppointments;
@@ -163,7 +167,7 @@ public class AppointmentManagementActivity extends AppCompatActivity {
     }
 
     private void showAppointmentActionDialog(AppointmentModel appointment) {
-        String[] actions = {"Mark as Serving", "Mark as Completed", "Cancel Appointment"};
+        String[] actions = {"Mark as Serving", "Mark as Completed", "Reschedule Appointment", "Cancel Appointment"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Manage Appointment");
         builder.setItems(actions, (dialog, which) -> {
@@ -172,10 +176,67 @@ public class AppointmentManagementActivity extends AppCompatActivity {
             } else if (which == 1) {
                 updateStatus(appointment.getAppointmentId(), "Completed");
             } else if (which == 2) {
+                showRescheduleDialog(appointment);
+            } else if (which == 3) {
                 updateStatus(appointment.getAppointmentId(), "Cancelled");
             }
         });
         builder.show();
+    }
+
+    private void showRescheduleDialog(AppointmentModel appointment) {
+        Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH);
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year1, month1, dayOfMonth) -> {
+            String selectedDate = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
+
+            int hour = cal.get(Calendar.HOUR_OF_DAY);
+            int minute = cal.get(Calendar.MINUTE);
+
+            TimePickerDialog timePickerDialog = new TimePickerDialog(this, (view1, hourOfDay, minute1) -> {
+                String amPm = (hourOfDay >= 12) ? "PM" : "AM";
+                int displayHour = (hourOfDay > 12) ? hourOfDay - 12 : (hourOfDay == 0 ? 12 : hourOfDay);
+                String selectedTime = String.format(Locale.getDefault(), "%02d:%02d %s", displayHour, minute1, amPm);
+
+                rescheduleAppointment(appointment, selectedDate, selectedTime);
+            }, hour, minute, false);
+            timePickerDialog.show();
+
+        }, year, month, day);
+        datePickerDialog.show();
+    }
+
+    private void rescheduleAppointment(AppointmentModel appointment, String newDate, String newTime) {
+        DatabaseReference apptRef = databaseReference.child(appointment.getAppointmentId());
+        apptRef.child("date").setValue(newDate);
+        apptRef.child("time").setValue(newTime)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Appointment rescheduled successfully", Toast.LENGTH_SHORT).show();
+                    sendRescheduleNotification(appointment, newDate, newTime);
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Failed to reschedule", Toast.LENGTH_SHORT).show());
+    }
+
+    private void sendRescheduleNotification(AppointmentModel appointment, String newDate, String newTime) {
+        DatabaseReference notifRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                .getReference("notifications").child(appointment.getPatientId());
+
+        String notifId = notifRef.push().getKey();
+        if (notifId != null) {
+            NotificationModel notification = new NotificationModel(
+                    notifId,
+                    appointment.getPatientId(),
+                    "Appointment Rescheduled",
+                    "Your appointment for " + appointment.getSpecialty() + " has been rescheduled to " + newDate + " at " + newTime + ".",
+                    System.currentTimeMillis(),
+                    "reschedule",
+                    appointment.getAppointmentId()
+            );
+            notifRef.child(notifId).setValue(notification);
+        }
     }
 
     private void updateStatus(String id, String status) {

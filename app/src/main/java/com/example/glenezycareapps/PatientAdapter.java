@@ -34,6 +34,14 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.PatientV
         UserModel patient = patientList.get(position);
         holder.tvPatientName.setText(patient.getFullName());
         holder.tvPatientEmail.setText(patient.getEmail());
+        
+        if (patient.getCurrentTicket() != null && patient.getCurrentTicket().getQueueNumber() != null) {
+            holder.tvPatientQueueNum.setText(patient.getCurrentTicket().getQueueNumber());
+            holder.tvPatientQueueNum.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvPatientQueueNum.setVisibility(View.GONE);
+        }
+        
         holder.itemView.setOnClickListener(v -> listener.onPatientClick(patient));
     }
 
@@ -43,12 +51,13 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.PatientV
     }
 
     public static class PatientViewHolder extends RecyclerView.ViewHolder {
-        TextView tvPatientName, tvPatientEmail;
+        TextView tvPatientName, tvPatientEmail, tvPatientQueueNum;
 
         public PatientViewHolder(@NonNull View itemView) {
             super(itemView);
             tvPatientName = itemView.findViewById(R.id.tvPatientName);
             tvPatientEmail = itemView.findViewById(R.id.tvPatientEmail);
+            tvPatientQueueNum = itemView.findViewById(R.id.tvPatientQueueNum);
         }
     }
 }

@@ -8,6 +8,7 @@ public class UserModel {
     private String phone;
     private String profilePic;
     private String specialty;
+    private TicketModel currentTicket;
 
     public UserModel() {
         // Required for Firebase
@@ -21,6 +22,14 @@ public class UserModel {
         this.phone = phone;
         this.profilePic = profilePic;
         this.specialty = specialty;
+    }
+
+    public TicketModel getCurrentTicket() {
+        return currentTicket;
+    }
+
+    public void setCurrentTicket(TicketModel currentTicket) {
+        this.currentTicket = currentTicket;
     }
 
     public String getSpecialty() {

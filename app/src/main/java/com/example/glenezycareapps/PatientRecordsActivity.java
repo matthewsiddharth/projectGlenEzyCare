@@ -180,14 +180,20 @@ public class PatientRecordsActivity extends AppCompatActivity {
     }
 
     private void showPatientDialog(UserModel patient) {
-        String[] options = {"View Details", "Delete Record", "Cancel"};
+        String[] options = {"View Details", "Queue History", "Delete Record", "Cancel"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(patient.getFullName());
         builder.setItems(options, (dialog, which) -> {
             if (which == 0) {
                 String details = "Email: " + patient.getEmail() + "\nPhone: " + (patient.getPhone() != null ? patient.getPhone() : "Not provided");
+                if (patient.getCurrentTicket() != null) {
+                    details += "\n\nActive Queue: " + patient.getCurrentTicket().getQueueNumber() +
+                               "\nStatus: " + patient.getCurrentTicket().getStatus();
+                }
                 Toast.makeText(this, details, Toast.LENGTH_LONG).show();
             } else if (which == 1) {
+                showQueueHistory(patient);
+            } else if (which == 2) {
                 new AlertDialog.Builder(this)
                         .setTitle("Delete Record")
                         .setMessage("Are you sure you want to delete this patient?")
@@ -200,6 +206,43 @@ public class PatientRecordsActivity extends AppCompatActivity {
             }
         });
         builder.show();
+    }
+
+    private void showQueueHistory(UserModel patient) {
+        databaseReference.child(patient.getUserId()).child("queueHistory")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (!snapshot.exists()) {
+                            Toast.makeText(PatientRecordsActivity.this, "No queue history found for this patient", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        StringBuilder history = new StringBuilder("Past Visits:\n");
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            String qNum = ds.child("queueNumber").getValue(String.class);
+                            String date = "Unknown Date";
+                            if (ds.hasChild("completedAt")) {
+                                long timestamp = ds.child("completedAt").getValue(Long.class);
+                                java.util.Date d = new java.util.Date(timestamp);
+                                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+                                date = sdf.format(d);
+                            }
+                            history.append("\n• ").append(qNum).append(" on ").append(date);
+                        }
+
+                        new AlertDialog.Builder(PatientRecordsActivity.this)
+                                .setTitle(patient.getFullName() + "'s Visits")
+                                .setMessage(history.toString())
+                                .setPositiveButton("Close", null)
+                                .show();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(PatientRecordsActivity.this, "Error fetching history", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void fetchPatients() {

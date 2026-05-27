@@ -18,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.database.*;
 
+import java.util.Map;
+
 public class QueueCallingActivity extends AppCompatActivity {
 
     TextView tvCurrentQueue, tvCallingDoctor, tvCallingSpecialty;
@@ -239,8 +241,25 @@ public class QueueCallingActivity extends AppCompatActivity {
                                     for (DataSnapshot ds : snapshot.getChildren()) {
                                         String userId = ds.child("userId").getValue(String.class);
                                         if (userId != null) {
-                                            FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
-                                                    .getReference("users").child(userId).child("currentTicket").removeValue();
+                                            DatabaseReference userRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
+                                                    .getReference("users").child(userId);
+                                            
+                                            // Move current ticket to history before removing it
+                                            userRef.child("currentTicket").get().addOnCompleteListener(ticketTask -> {
+                                                if (ticketTask.isSuccessful() && ticketTask.getResult().exists()) {
+                                                    DataSnapshot ticketSnap = ticketTask.getResult();
+                                                    String historyId = userRef.child("queueHistory").push().getKey();
+                                                    if (historyId != null) {
+                                                        Map<String, Object> ticketData = (Map<String, Object>) ticketSnap.getValue();
+                                                        if (ticketData != null) {
+                                                            ticketData.put("completedAt", ServerValue.TIMESTAMP);
+                                                            ticketData.put("status", "Completed");
+                                                            userRef.child("queueHistory").child(historyId).setValue(ticketData);
+                                                        }
+                                                    }
+                                                }
+                                                userRef.child("currentTicket").removeValue();
+                                            });
                                         }
                                         // 2. Remove from global tickets list
                                         ds.getRef().removeValue();
