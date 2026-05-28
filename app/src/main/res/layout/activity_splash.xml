@@ -2,13 +2,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/doctor">
+    android:background="@drawable/splashscreen_bg">
 
     <!-- Darker overlay for better text visibility -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#99000000" />
+        android:background="#B3000000" />
 
     <LinearLayout
         android:layout_width="wrap_content"
