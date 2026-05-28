@@ -225,7 +225,11 @@
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:gravity="center"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="8dp">
                         <androidx.cardview.widget.CardView
                             android:layout_width="50dp"
                             android:layout_height="50dp"
@@ -254,7 +258,11 @@
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:gravity="center"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="8dp">
                         <androidx.cardview.widget.CardView
                             android:layout_width="50dp"
                             android:layout_height="50dp"
@@ -283,7 +291,11 @@
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:gravity="center"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="8dp">
                         <androidx.cardview.widget.CardView
                             android:layout_width="50dp"
                             android:layout_height="50dp"
@@ -312,7 +324,11 @@
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:gravity="center"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="8dp">
                         <androidx.cardview.widget.CardView
                             android:layout_width="50dp"
                             android:layout_height="50dp"
