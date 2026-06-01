@@ -289,7 +289,10 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:gravity="center"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?android:attr/selectableItemBackground">
 
                             <androidx.cardview.widget.CardView
                                 android:layout_width="50dp"
@@ -304,6 +307,14 @@
                                     android:src="@android:drawable/ic_menu_myplaces"
                                     app:tint="#3F51B5" />
                             </androidx.cardview.widget.CardView>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="Staff"
+                                android:textColor="#333333"
+                                android:textSize="12sp" />
                         </LinearLayout>
 
                         <!-- Patients -->
@@ -313,7 +324,10 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:gravity="center"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?android:attr/selectableItemBackground">
 
                             <androidx.cardview.widget.CardView
                                 android:layout_width="50dp"
@@ -328,6 +342,14 @@
                                     android:src="@android:drawable/ic_menu_add"
                                     app:tint="#66BB6A" />
                             </androidx.cardview.widget.CardView>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="Patients"
+                                android:textColor="#333333"
+                                android:textSize="12sp" />
                         </LinearLayout>
 
                         <!-- Queue -->
@@ -337,7 +359,10 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:gravity="center"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?android:attr/selectableItemBackground">
 
                             <androidx.cardview.widget.CardView
                                 android:layout_width="50dp"
@@ -352,6 +377,14 @@
                                     android:src="@android:drawable/ic_menu_sort_by_size"
                                     app:tint="#FF9800" />
                             </androidx.cardview.widget.CardView>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="Queue"
+                                android:textColor="#333333"
+                                android:textSize="12sp" />
                         </LinearLayout>
 
                         <!-- Reports (View Status) -->
@@ -361,7 +394,10 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:gravity="center"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?android:attr/selectableItemBackground">
 
                             <androidx.cardview.widget.CardView
                                 android:layout_width="50dp"
@@ -376,6 +412,14 @@
                                     android:src="@android:drawable/ic_menu_agenda"
                                     app:tint="#9C27B0" />
                             </androidx.cardview.widget.CardView>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="Status"
+                                android:textColor="#333333"
+                                android:textSize="12sp" />
                         </LinearLayout>
 
                     </GridLayout>
