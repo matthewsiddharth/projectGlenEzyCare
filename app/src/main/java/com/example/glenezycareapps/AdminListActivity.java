@@ -40,6 +40,11 @@ public class AdminListActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onEditClick(UserModel staff) {
+                showEditAdminDialog(staff);
+            }
+
+            @Override
             public void onDeleteClick(UserModel staff) {
                 confirmDeleteAdmin(staff);
             }
@@ -63,6 +68,38 @@ public class AdminListActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
+    }
+
+    private void showEditAdminDialog(UserModel admin) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Edit Admin Info");
+
+        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+
+        final android.widget.EditText etName = new android.widget.EditText(this);
+        etName.setHint("Full Name");
+        etName.setText(admin.getFullName());
+        layout.addView(etName);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            String newName = etName.getText().toString().trim();
+
+            if (newName.isEmpty()) {
+                Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            databaseReference.child(admin.getUserId()).child("fullName").setValue(newName)
+                    .addOnSuccessListener(aVoid -> Toast.makeText(AdminListActivity.this, "Admin info updated", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(AdminListActivity.this, "Update failed", Toast.LENGTH_SHORT).show());
+        });
+
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
     }
 
     private void showAdminDialog(UserModel admin) {

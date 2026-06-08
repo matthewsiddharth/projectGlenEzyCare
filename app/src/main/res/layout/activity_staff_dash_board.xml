@@ -93,14 +93,29 @@
                             android:gravity="center_vertical"
                             android:orientation="horizontal">
 
-                            <ImageView
-                                android:id="@+id/btnNotification"
-                                android:layout_width="40dp"
-                                android:layout_height="40dp"
-                                android:layout_marginEnd="8dp"
-                                android:padding="8dp"
-                                android:src="@android:drawable/ic_popup_reminder"
-                                app:tint="#757575" />
+                            <FrameLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp">
+
+                                <ImageView
+                                    android:id="@+id/btnNotification"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:padding="8dp"
+                                    android:src="@android:drawable/ic_popup_reminder"
+                                    app:tint="#757575" />
+
+                                <View
+                                    android:id="@+id/vNotificationBadge"
+                                    android:layout_width="10dp"
+                                    android:layout_height="10dp"
+                                    android:layout_gravity="top|end"
+                                    android:layout_marginTop="8dp"
+                                    android:layout_marginEnd="8dp"
+                                    android:background="@drawable/notification_badge"
+                                    android:visibility="gone" />
+                            </FrameLayout>
 
                             <de.hdodenhof.circleimageview.CircleImageView
                                 android:id="@+id/ivStaffProfile"
@@ -418,7 +433,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_myplaces"
+                    android:src="@drawable/iconprofile"
                     app:tint="#B2DFDB" />
 
                 <TextView

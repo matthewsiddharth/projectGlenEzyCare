@@ -15,6 +15,7 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.StaffViewHol
 
     public interface OnStaffClickListener {
         void onStaffClick(UserModel staff);
+        void onEditClick(UserModel staff);
         void onDeleteClick(UserModel staff);
     }
 
@@ -43,6 +44,7 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.StaffViewHol
         holder.tvStaffRole.setText(roleInfo);
         
         holder.itemView.setOnClickListener(v -> listener.onStaffClick(staff));
+        holder.btnEditStaff.setOnClickListener(v -> listener.onEditClick(staff));
         holder.btnDeleteStaff.setOnClickListener(v -> listener.onDeleteClick(staff));
     }
 
@@ -53,13 +55,14 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.StaffViewHol
 
     public static class StaffViewHolder extends RecyclerView.ViewHolder {
         TextView tvStaffName, tvStaffEmail, tvStaffRole;
-        View btnDeleteStaff;
+        View btnDeleteStaff, btnEditStaff;
 
         public StaffViewHolder(@NonNull View itemView) {
             super(itemView);
             tvStaffName = itemView.findViewById(R.id.tvStaffName);
             tvStaffEmail = itemView.findViewById(R.id.tvStaffEmail);
             tvStaffRole = itemView.findViewById(R.id.tvStaffRole);
+            btnEditStaff = itemView.findViewById(R.id.btnEditStaff);
             btnDeleteStaff = itemView.findViewById(R.id.btnDeleteStaff);
         }
     }

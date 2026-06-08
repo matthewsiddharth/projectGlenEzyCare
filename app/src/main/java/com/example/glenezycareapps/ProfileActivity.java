@@ -80,7 +80,7 @@ public class ProfileActivity extends AppCompatActivity {
                     if (profilePicUrl != null && !profilePicUrl.isEmpty() && !isDestroyed()) {
                         Glide.with(ProfileActivity.this)
                                 .load(profilePicUrl)
-                                .placeholder(android.R.drawable.ic_menu_myplaces)
+                                .placeholder(R.drawable.iconprofile)
                                 .into(ivProfilePic);
                     }
                 }

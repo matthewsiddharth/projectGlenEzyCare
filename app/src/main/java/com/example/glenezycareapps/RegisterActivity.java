@@ -111,7 +111,11 @@ public class RegisterActivity extends AppCompatActivity {
                             String userId = mAuth.getCurrentUser().getUid();
 
                             HashMap<String, String> userMap = new HashMap<>();
-                            userMap.put("fullName", name);
+                            String finalName = name;
+                            if ("staff".equals(role) && !name.toLowerCase().startsWith("dr. ")) {
+                                finalName = "Dr. " + name;
+                            }
+                            userMap.put("fullName", finalName);
                             userMap.put("email", email);
                             userMap.put("role", role);
                             if (!specialty.isEmpty()) {

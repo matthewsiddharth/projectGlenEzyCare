@@ -48,6 +48,11 @@ public class StaffListActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onEditClick(UserModel staff) {
+                showEditStaffDialog(staff);
+            }
+
+            @Override
             public void onDeleteClick(UserModel staff) {
                 confirmDeleteStaff(staff);
             }
@@ -81,6 +86,71 @@ public class StaffListActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+    }
+
+    private void showEditStaffDialog(UserModel staff) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Edit Staff Info");
+
+        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+
+        final android.widget.EditText etName = new android.widget.EditText(this);
+        etName.setHint("Full Name");
+        etName.setText(staff.getFullName());
+        layout.addView(etName);
+
+        final android.widget.Spinner spSpecialty = new android.widget.Spinner(this);
+        String[] depts = {
+                "None/Admin", "Cardiology", "ENT (Otorhinolaryngology)",
+                "Orthopedic Surgery", "Dermatology", "Pediatrics",
+                "Obstetrics & Gynecology", "Ophthalmology", "Gastroenterology",
+                "Neurology", "Psychiatry", "Dentistry", "General Surgery"
+        };
+        ArrayAdapter<String> spAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, depts);
+        spAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spSpecialty.setAdapter(spAdapter);
+        
+        // Set current specialty
+        if (staff.getSpecialty() != null && !staff.getSpecialty().isEmpty()) {
+            for (int i = 0; i < depts.length; i++) {
+                if (depts[i].equals(staff.getSpecialty())) {
+                    spSpecialty.setSelection(i);
+                    break;
+                }
+            }
+        }
+        layout.addView(spSpecialty);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            String newName = etName.getText().toString().trim();
+            String newSpecialty = spSpecialty.getSelectedItem().toString();
+            if (newSpecialty.equals("None/Admin")) newSpecialty = "";
+
+            if (newName.isEmpty()) {
+                Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Apply Dr. prefix if it's staff role and missing
+            if ("staff".equals(staff.getRole()) && !newName.toLowerCase().startsWith("dr. ")) {
+                newName = "Dr. " + newName;
+            }
+
+            java.util.Map<String, Object> updates = new java.util.HashMap<>();
+            updates.put("fullName", newName);
+            updates.put("specialty", newSpecialty);
+
+            databaseReference.child(staff.getUserId()).updateChildren(updates)
+                    .addOnSuccessListener(aVoid -> Toast.makeText(StaffListActivity.this, "Staff info updated", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(StaffListActivity.this, "Update failed", Toast.LENGTH_SHORT).show());
+        });
+
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
     }
 
     private void confirmDeleteStaff(UserModel staff) {

@@ -43,17 +43,33 @@
             app:layout_constraintTop_toTopOf="parent"
             app:tint="#333333" />
 
-        <ImageView
-            android:id="@+id/btnNotification"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+        <FrameLayout
+            android:id="@+id/flNotification"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:padding="8dp"
-            android:src="@android:drawable/ic_popup_reminder"
             app:layout_constraintBottom_toBottomOf="@+id/ivProfileTop"
             app:layout_constraintEnd_toStartOf="@+id/ivProfileTop"
-            app:layout_constraintTop_toTopOf="@+id/ivProfileTop"
-            app:tint="#757575" />
+            app:layout_constraintTop_toTopOf="@+id/ivProfileTop">
+
+            <ImageView
+                android:id="@+id/btnNotification"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_popup_reminder"
+                app:tint="#757575" />
+
+            <View
+                android:id="@+id/vNotificationBadge"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/notification_badge"
+                android:visibility="gone" />
+        </FrameLayout>
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/ivProfileTop"
@@ -179,24 +195,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:layout_marginBottom="16dp"
                             android:text="● Updated just now"
                             android:textColor="#4CAF50"
                             android:textSize="12sp"
+                            app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@+id/tvHomeConsultationRoom" />
-
-                        <ProgressBar
-                            android:id="@+id/pbWait"
-                            style="?android:attr/progressBarStyleHorizontal"
-                            android:layout_width="0dp"
-                            android:layout_height="6dp"
-                            android:layout_marginTop="8dp"
-                            android:progress="75"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@+id/tvHomeQueueStatus" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>
@@ -504,7 +508,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_myplaces"
+                    android:src="@drawable/iconprofile"
                     app:tint="#E3F2FD" />
 
                 <TextView

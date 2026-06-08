@@ -93,6 +93,11 @@ public class StaffManagementActivity extends AppCompatActivity {
             return;
         }
 
+        // Ensure "Dr. " for doctors (staff role)
+        if (role.equals("staff") && !name.toLowerCase().startsWith("dr. ")) {
+            name = "Dr. " + name;
+        }
+
         HashMap<String, String> staffMap = new HashMap<>();
         staffMap.put("fullName", name);
         staffMap.put("email", email);

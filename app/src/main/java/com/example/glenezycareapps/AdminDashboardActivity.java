@@ -1,6 +1,9 @@
 package com.example.glenezycareapps;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -31,9 +34,11 @@ public class AdminDashboardActivity extends AppCompatActivity {
     LinearLayout btnLogout, navDashboard, navStaff, navPatients, navAdmins, llDepartmentStats;
     TextView tvAdminName, tvTotalPatients, tvActiveStaff, tvAppointmentsToday, tvQueueEfficiency;
     ImageView ivAdminProfile, btnMenu, btnNotification;
+    View vNotificationBadge;
     DrawerLayout drawerLayout;
 
     DatabaseReference rootRef;
+    private boolean isInitialLoad = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +64,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         tvAdminName = findViewById(R.id.tvAdminName);
         ivAdminProfile = findViewById(R.id.ivAdminProfile);
         btnNotification = findViewById(R.id.btnNotification);
+        vNotificationBadge = findViewById(R.id.vNotificationBadge);
         btnMenu = findViewById(R.id.btnMenu);
         drawerLayout = findViewById(R.id.drawerLayout);
         
@@ -73,6 +79,8 @@ public class AdminDashboardActivity extends AppCompatActivity {
         fetchAdminData();
         fetchRealTimeStats();
         fetchDepartmentOverview();
+        listenForNotifications();
+        requestNotificationPermission();
 
         btnManageStaff.setOnClickListener(v -> startActivity(new Intent(this, StaffManagementActivity.class)));
         btnManagePatients.setOnClickListener(v -> startActivity(new Intent(this, PatientRecordsActivity.class)));
@@ -168,18 +176,32 @@ public class AdminDashboardActivity extends AppCompatActivity {
         rootRef.child("queue").child("tickets").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                long total = snapshot.getChildrenCount();
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                cal.set(java.util.Calendar.MINUTE, 0);
+                cal.set(java.util.Calendar.SECOND, 0);
+                cal.set(java.util.Calendar.MILLISECOND, 0);
+                long startOfToday = cal.getTimeInMillis();
+
+                long total = 0;
+                long active = 0;
+
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Long timestamp = ds.child("timestamp").getValue(Long.class);
+                    if (timestamp != null && timestamp >= startOfToday) {
+                        total++;
+                        String status = ds.child("status").getValue(String.class);
+                        if ("Now Serving".equals(status)) {
+                            active++;
+                        }
+                    }
+                }
+
                 if (total == 0) {
                     tvQueueEfficiency.setText("100%");
                     return;
                 }
-                long active = 0;
-                for (DataSnapshot ds : snapshot.getChildren()) {
-                    String status = ds.child("status").getValue(String.class);
-                    if (!"Waiting".equals(status)) {
-                        active++;
-                    }
-                }
+
                 int efficiency = (int) ((active * 100) / total);
                 tvQueueEfficiency.setText(efficiency + "%");
             }
@@ -202,9 +224,24 @@ public class AdminDashboardActivity extends AppCompatActivity {
                 java.util.Map<String, Integer> deptCounts = new java.util.HashMap<>();
                 int maxCount = 0;
 
+                // Get start of today to filter old tickets
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                cal.set(java.util.Calendar.MINUTE, 0);
+                cal.set(java.util.Calendar.SECOND, 0);
+                cal.set(java.util.Calendar.MILLISECOND, 0);
+                long startOfToday = cal.getTimeInMillis();
+
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     String specialty = ds.child("specialty").getValue(String.class);
-                    if (specialty != null) {
+                    String status = ds.child("status").getValue(String.class);
+                    Long timestamp = ds.child("timestamp").getValue(Long.class);
+                    
+                    // Only count active patients (Waiting or Now Serving) from today
+                    boolean isToday = timestamp != null && timestamp >= startOfToday;
+                    boolean isActive = "Waiting".equals(status) || "Now Serving".equals(status);
+
+                    if (specialty != null && isActive && isToday) {
                         int count = deptCounts.getOrDefault(specialty, 0) + 1;
                         deptCounts.put(specialty, count);
                         if (count > maxCount) maxCount = count;
@@ -260,5 +297,55 @@ public class AdminDashboardActivity extends AppCompatActivity {
         });
 
         llDepartmentStats.addView(row);
+    }
+
+    private void listenForNotifications() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        rootRef.child("notifications").child(uid).addChildEventListener(new com.google.firebase.database.ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
+                if (!isInitialLoad) {
+                    NotificationModel notif = snapshot.getValue(NotificationModel.class);
+                    if (notif != null) {
+                        NotificationHelper.showNotification(AdminDashboardActivity.this, notif.getTitle(), notif.getMessage());
+                        vNotificationBadge.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {}
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, String previousChildName) {}
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        rootRef.child("notifications").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                isInitialLoad = false;
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    NotificationModel notif = ds.getValue(NotificationModel.class);
+                    if (notif != null && !notif.isRead()) {
+                        vNotificationBadge.setVisibility(View.VISIBLE);
+                        break;
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
     }
 }

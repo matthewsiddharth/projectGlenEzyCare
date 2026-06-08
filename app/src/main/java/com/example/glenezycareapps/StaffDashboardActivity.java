@@ -1,6 +1,9 @@
 package com.example.glenezycareapps;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +31,7 @@ public class StaffDashboardActivity extends AppCompatActivity {
     LinearLayout btnLogout, llLiveQueueList, navDashboard, navQueue, navPatients;
     TextView tvStaffName, tvStaffCurrentQueue, tvStaffWaitingCount;
     ImageView ivStaffProfile, btnMenu, btnNotification;
+    View vNotificationBadge;
     DrawerLayout drawerLayout;
 
     DatabaseReference rootRef;
@@ -35,6 +39,7 @@ public class StaffDashboardActivity extends AppCompatActivity {
     private DataSnapshot lastTicketsSnapshot;
     private String staffSpecialty = null;
     private String staffRole = "";
+    private boolean isInitialLoad = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +59,7 @@ public class StaffDashboardActivity extends AppCompatActivity {
         tvStaffName = findViewById(R.id.tvStaffName);
         ivStaffProfile = findViewById(R.id.ivStaffProfile);
         btnNotification = findViewById(R.id.btnNotification);
+        vNotificationBadge = findViewById(R.id.vNotificationBadge);
         btnMenu = findViewById(R.id.btnMenu);
         drawerLayout = findViewById(R.id.drawerLayout);
         tvStaffCurrentQueue = findViewById(R.id.tvStaffCurrentQueue);
@@ -64,6 +70,8 @@ public class StaffDashboardActivity extends AppCompatActivity {
 
         fetchStaffData();
         fetchRealTimeQueue();
+        listenForNotifications();
+        requestNotificationPermission();
 
         btnCallQueue.setOnClickListener(v -> {
             Intent intent = new Intent(this, QueueCallingActivity.class);
@@ -267,5 +275,55 @@ public class StaffDashboardActivity extends AppCompatActivity {
         divider.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1));
         divider.setBackgroundColor(0xFFF1F1F1);
         llLiveQueueList.addView(divider);
+    }
+
+    private void listenForNotifications() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        rootRef.child("notifications").child(uid).addChildEventListener(new com.google.firebase.database.ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
+                if (!isInitialLoad) {
+                    NotificationModel notif = snapshot.getValue(NotificationModel.class);
+                    if (notif != null) {
+                        NotificationHelper.showNotification(StaffDashboardActivity.this, notif.getTitle(), notif.getMessage());
+                        vNotificationBadge.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {}
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, String previousChildName) {}
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        rootRef.child("notifications").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                isInitialLoad = false;
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    NotificationModel notif = ds.getValue(NotificationModel.class);
+                    if (notif != null && !notif.isRead()) {
+                        vNotificationBadge.setVisibility(View.VISIBLE);
+                        break;
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
     }
 }

@@ -112,7 +112,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     if (profilePicUrl != null && !profilePicUrl.isEmpty() && !isDestroyed()) {
                         Glide.with(EditProfileActivity.this)
                                 .load(profilePicUrl)
-                                .placeholder(android.R.drawable.ic_menu_myplaces)
+                                .placeholder(R.drawable.iconprofile)
                                 .into(ivProfilePic);
                     }
                 }
@@ -170,18 +170,30 @@ public class EditProfileActivity extends AppCompatActivity {
         progressDialog.setMessage("Updating profile...");
         progressDialog.show();
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("fullName", name);
-        updates.put("phone", phone);
-
-        databaseReference.updateChildren(updates).addOnCompleteListener(task -> {
-            progressDialog.dismiss();
-            if (task.isSuccessful()) {
-                Toast.makeText(this, "Profile Updated Successfully", Toast.LENGTH_SHORT).show();
-                finish(); // Go back to view profile
-            } else {
-                Toast.makeText(this, "Update Failed", Toast.LENGTH_SHORT).show();
+        databaseReference.child("role").get().addOnCompleteListener(roleTask -> {
+            String role = "patient";
+            if (roleTask.isSuccessful() && roleTask.getResult().exists()) {
+                role = roleTask.getResult().getValue(String.class);
             }
+
+            String finalName = name;
+            if ("staff".equals(role) && !name.toLowerCase().startsWith("dr. ")) {
+                finalName = "Dr. " + name;
+            }
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("fullName", finalName);
+            updates.put("phone", phone);
+
+            databaseReference.updateChildren(updates).addOnCompleteListener(task -> {
+                progressDialog.dismiss();
+                if (task.isSuccessful()) {
+                    Toast.makeText(this, "Profile Updated Successfully", Toast.LENGTH_SHORT).show();
+                    finish(); // Go back to view profile
+                } else {
+                    Toast.makeText(this, "Update Failed", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
     }
 }

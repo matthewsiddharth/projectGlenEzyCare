@@ -1,6 +1,9 @@
 package com.example.glenezycareapps;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
@@ -33,16 +36,17 @@ import java.util.Locale;
 public class PatientHomeActivity extends AppCompatActivity {
 
     View btnQueue, btnQueueStatus, btnAppointment, btnHistory, cardUpcoming;
-    TextView tvUserName, tvGreeting, tvHomeQueueNum, tvWaitTime, tvHomeConsultationRoom, btnSeeAll;
+    TextView tvUserName, tvGreeting, tvHomeQueueNum, tvWaitTime, tvHomeConsultationRoom, btnSeeAll, tvHomeQueueStatus;
     TextView tvUpcomingSpecialty, tvUpcomingDoctor, tvUpcomingDateTime;
     ImageView btnMenu, ivProfileTop, btnNotification;
+    View vNotificationBadge;
     BottomNavigationView bottomNav;
-    ProgressBar pbWait;
     DrawerLayout drawerLayout;
     LinearLayout navHome, navProfile, navAppointments, navLogout;
     
     DatabaseReference rootRef;
     FirebaseAuth mAuth;
+    private boolean isInitialLoad = true;
 
     private CountDownTimer countDownTimer;
     private long timeLeftInMillis;
@@ -65,13 +69,14 @@ public class PatientHomeActivity extends AppCompatActivity {
         
         btnMenu = findViewById(R.id.btnMenu);
         btnNotification = findViewById(R.id.btnNotification);
+        vNotificationBadge = findViewById(R.id.vNotificationBadge);
         ivProfileTop = findViewById(R.id.ivProfileTop);
         tvUserName = findViewById(R.id.tvUserName);
         tvGreeting = findViewById(R.id.tvGreeting);
         tvHomeQueueNum = findViewById(R.id.tvHomeQueueNum);
         tvWaitTime = findViewById(R.id.tvWaitTime);
         tvHomeConsultationRoom = findViewById(R.id.tvHomeConsultationRoom);
-        pbWait = findViewById(R.id.pbWait);
+        tvHomeQueueStatus = findViewById(R.id.tvHomeQueueStatus);
         bottomNav = findViewById(R.id.bottomNav);
         drawerLayout = findViewById(R.id.drawerLayout);
         
@@ -92,6 +97,8 @@ public class PatientHomeActivity extends AppCompatActivity {
             trackNowServing();
             checkAndGenerateReminders();
             loadUpcomingAppointment();
+            listenForNotifications();
+            requestNotificationPermission();
         }
 
         btnQueue.setOnClickListener(v -> startActivity(new Intent(this, QueueActivity.class)));
@@ -165,7 +172,6 @@ public class PatientHomeActivity extends AppCompatActivity {
                         tvHomeQueueNum.setText("None");
                         tvWaitTime.setText("--:--\nmin");
                         tvHomeConsultationRoom.setText("No active queue");
-                        pbWait.setProgress(0);
                         if (countDownTimer != null) countDownTimer.cancel();
                     }
                 }
@@ -206,10 +212,12 @@ public class PatientHomeActivity extends AppCompatActivity {
                     
                     if (myNumInt <= nowServing) {
                         tvWaitTime.setText("NOW");
-                        pbWait.setProgress(100);
+                        tvHomeQueueStatus.setText("Serving Now");
+                        sendTurnNotification();
                         if (countDownTimer != null) countDownTimer.cancel();
                         return;
                     }
+                    tvHomeQueueStatus.setText("● Updated just now");
 
                     // Count how many people are between nowServing and myNumber WITH SAME SPECIALTY
                     rootRef.child("queue").child("tickets").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -273,16 +281,12 @@ public class PatientHomeActivity extends AppCompatActivity {
             public void onTick(long millisUntilFinished) {
                 timeLeftInMillis = millisUntilFinished;
                 updateCountdownText();
-                
-                // Update progress bar based on time
-                int progress = (int) (100 - (millisUntilFinished * 100 / totalDuration));
-                pbWait.setProgress(progress);
             }
 
             @Override
             public void onFinish() {
                 tvWaitTime.setText("NOW");
-                pbWait.setProgress(100);
+                tvHomeQueueStatus.setText("Serving Now");
                 sendTurnNotification();
             }
         }.start();
@@ -467,5 +471,55 @@ public class PatientHomeActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    private void listenForNotifications() {
+        String uid = mAuth.getCurrentUser().getUid();
+        rootRef.child("notifications").child(uid).addChildEventListener(new com.google.firebase.database.ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
+                if (!isInitialLoad) {
+                    NotificationModel notif = snapshot.getValue(NotificationModel.class);
+                    if (notif != null) {
+                        NotificationHelper.showNotification(PatientHomeActivity.this, notif.getTitle(), notif.getMessage());
+                        vNotificationBadge.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {}
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, String previousChildName) {}
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        // Set isInitialLoad to false after the first set of data is retrieved
+        rootRef.child("notifications").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                isInitialLoad = false;
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    NotificationModel notif = ds.getValue(NotificationModel.class);
+                    if (notif != null && !notif.isRead()) {
+                        vNotificationBadge.setVisibility(View.VISIBLE);
+                        break;
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
     }
 }
