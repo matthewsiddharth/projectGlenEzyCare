@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,6 +37,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
     ImageView ivAdminProfile, btnMenu, btnNotification;
     View vNotificationBadge;
     DrawerLayout drawerLayout;
+    SwipeRefreshLayout swipeRefresh;
 
     DatabaseReference rootRef;
     private boolean isInitialLoad = true;
@@ -73,6 +75,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         tvAppointmentsToday = findViewById(R.id.tvAppointmentsTodayCount);
         tvQueueEfficiency = findViewById(R.id.tvQueueEfficiencyValue);
         llDepartmentStats = findViewById(R.id.llDepartmentStats);
+        swipeRefresh = findViewById(R.id.swipeRefresh);
 
         rootRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
 
@@ -81,6 +84,8 @@ public class AdminDashboardActivity extends AppCompatActivity {
         fetchDepartmentOverview();
         listenForNotifications();
         requestNotificationPermission();
+
+        swipeRefresh.setOnRefreshListener(this::reloadData);
 
         btnManageStaff.setOnClickListener(v -> startActivity(new Intent(this, StaffManagementActivity.class)));
         btnManagePatients.setOnClickListener(v -> startActivity(new Intent(this, PatientRecordsActivity.class)));
@@ -119,6 +124,13 @@ public class AdminDashboardActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+    }
+
+    private void reloadData() {
+        fetchAdminData();
+        fetchRealTimeStats();
+        fetchDepartmentOverview();
+        new android.os.Handler().postDelayed(() -> swipeRefresh.setRefreshing(false), 1500);
     }
 
     private void fetchAdminData() {

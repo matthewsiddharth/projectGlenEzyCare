@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,6 +34,7 @@ public class StaffDashboardActivity extends AppCompatActivity {
     ImageView ivStaffProfile, btnMenu, btnNotification;
     View vNotificationBadge;
     DrawerLayout drawerLayout;
+    SwipeRefreshLayout swipeRefresh;
 
     DatabaseReference rootRef;
     private int currentNowServing = 0;
@@ -65,6 +67,7 @@ public class StaffDashboardActivity extends AppCompatActivity {
         tvStaffCurrentQueue = findViewById(R.id.tvStaffCurrentQueue);
         tvStaffWaitingCount = findViewById(R.id.tvStaffWaitingCount);
         llLiveQueueList = findViewById(R.id.llLiveQueueList);
+        swipeRefresh = findViewById(R.id.swipeRefresh);
 
         rootRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
 
@@ -72,6 +75,8 @@ public class StaffDashboardActivity extends AppCompatActivity {
         fetchRealTimeQueue();
         listenForNotifications();
         requestNotificationPermission();
+
+        swipeRefresh.setOnRefreshListener(this::reloadData);
 
         btnCallQueue.setOnClickListener(v -> {
             Intent intent = new Intent(this, QueueCallingActivity.class);
@@ -115,6 +120,12 @@ public class StaffDashboardActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+    }
+
+    private void reloadData() {
+        fetchStaffData();
+        fetchRealTimeQueue();
+        new android.os.Handler().postDelayed(() -> swipeRefresh.setRefreshing(false), 1500);
     }
 
     private void fetchStaffData() {

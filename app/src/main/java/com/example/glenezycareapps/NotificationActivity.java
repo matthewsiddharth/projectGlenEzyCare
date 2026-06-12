@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -27,6 +28,7 @@ public class NotificationActivity extends AppCompatActivity {
     private NotificationAdapter adapter;
     private List<NotificationModel> notificationList;
     private LinearLayout llEmptyState;
+    private SwipeRefreshLayout swipeRefresh;
     private DatabaseReference rootRef;
     private FirebaseAuth mAuth;
 
@@ -39,6 +41,7 @@ public class NotificationActivity extends AppCompatActivity {
 
         rvNotifications = findViewById(R.id.rvNotifications);
         llEmptyState = findViewById(R.id.llEmptyState);
+        swipeRefresh = findViewById(R.id.swipeRefresh);
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
 
         notificationList = new ArrayList<>();
@@ -57,6 +60,8 @@ public class NotificationActivity extends AppCompatActivity {
             fetchNotifications();
             markAllAsRead();
         }
+
+        swipeRefresh.setOnRefreshListener(this::fetchNotifications);
     }
 
     private void fetchNotifications() {
@@ -82,6 +87,7 @@ public class NotificationActivity extends AppCompatActivity {
                     llEmptyState.setVisibility(View.GONE);
                     rvNotifications.setVisibility(View.VISIBLE);
                 }
+                swipeRefresh.setRefreshing(false);
             }
 
             @Override

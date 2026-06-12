@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -43,6 +44,7 @@ public class PatientHomeActivity extends AppCompatActivity {
     BottomNavigationView bottomNav;
     DrawerLayout drawerLayout;
     LinearLayout navHome, navProfile, navAppointments, navLogout;
+    SwipeRefreshLayout swipeRefresh;
     
     DatabaseReference rootRef;
     FirebaseAuth mAuth;
@@ -88,6 +90,7 @@ public class PatientHomeActivity extends AppCompatActivity {
         navProfile = findViewById(R.id.navProfile);
         navAppointments = findViewById(R.id.navAppointments);
         navLogout = findViewById(R.id.navLogout);
+        swipeRefresh = findViewById(R.id.swipeRefresh);
 
         rootRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
         mAuth = FirebaseAuth.getInstance();
@@ -100,6 +103,8 @@ public class PatientHomeActivity extends AppCompatActivity {
             listenForNotifications();
             requestNotificationPermission();
         }
+
+        swipeRefresh.setOnRefreshListener(this::reloadData);
 
         btnQueue.setOnClickListener(v -> startActivity(new Intent(this, QueueActivity.class)));
         btnQueueStatus.setOnClickListener(v -> startActivity(new Intent(this, QueueStatusActivity.class)));
@@ -136,6 +141,19 @@ public class PatientHomeActivity extends AppCompatActivity {
         });
 
         setupBottomNav();
+    }
+
+    private void reloadData() {
+        if (mAuth.getCurrentUser() != null) {
+            loadUserData();
+            trackNowServing();
+            checkAndGenerateReminders();
+            loadUpcomingAppointment();
+            // Stopping the animation after 1.5 seconds or when data is roughly loaded
+            new android.os.Handler().postDelayed(() -> swipeRefresh.setRefreshing(false), 1500);
+        } else {
+            swipeRefresh.setRefreshing(false);
+        }
     }
 
     private void loadUserData() {
@@ -242,8 +260,8 @@ public class PatientHomeActivity extends AppCompatActivity {
                                 }
                             }
 
-                            // Calculate wait time: 2 minutes per person ahead
-                            long millis = (long) (peopleAheadSameDept + 1) * 2 * 60 * 1000;
+                            // Calculate wait time: 1 minute per person ahead (for testing)
+                            long millis = (long) (peopleAheadSameDept + 1) * 1 * 60 * 1000;
                             
                             // Only start if not already counting for this specific ticket
                             if (countDownTimer == null || !myNumber.equals(lastTimerQueueNum)) {
@@ -256,8 +274,8 @@ public class PatientHomeActivity extends AppCompatActivity {
                         public void onCancelled(@NonNull DatabaseError error) {}
                     });
                 } else {
-                    // If no one is serving in this specialty yet, wait time is based on myNumInt
-                    long millis = (long) myNumInt * 2 * 60 * 1000;
+                    // If no one is serving in this specialty yet, wait time is based on myNumInt (1 min per person for testing)
+                    long millis = (long) myNumInt * 1 * 60 * 1000;
                     if (countDownTimer == null || !myNumber.equals(lastTimerQueueNum)) {
                         lastTimerQueueNum = myNumber;
                         startCountdown(millis);

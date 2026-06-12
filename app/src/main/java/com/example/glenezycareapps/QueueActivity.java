@@ -19,9 +19,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class QueueActivity extends AppCompatActivity {
@@ -181,64 +184,74 @@ public class QueueActivity extends AppCompatActivity {
         String specialty = spinnerSpecialty.getSelectedItem().toString();
         String floor = specialtyFloorMap.get(specialty);
         String prefix = specialtyPrefixMap.getOrDefault(specialty, "Q");
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-        // Use specialty-specific counter
-        queueRef.child("nextTicketNumber").child(specialty)
-                .addListenerForSingleValueEvent(
-                        new ValueEventListener() {
+        // Use specialty-specific counter with daily reset logic
+        queueRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int nextNumber = 1;
+                String lastResetDate = "";
 
-                            @Override
-                            public void onDataChange(
-                                    @NonNull DataSnapshot snapshot) {
+                if (snapshot.child("lastResetDate").child(specialty).exists()) {
+                    lastResetDate = snapshot.child("lastResetDate").child(specialty).getValue(String.class);
+                }
 
-                                int nextNumber = 1;
+                if (todayDate.equals(lastResetDate)) {
+                    // Same day, use existing counter
+                    if (snapshot.child("nextTicketNumber").child(specialty).exists()) {
+                        Integer val = snapshot.child("nextTicketNumber").child(specialty).getValue(Integer.class);
+                        if (val != null) nextNumber = val;
+                    }
+                } else {
+                    // New day! Reset counter to 1
+                    nextNumber = 1;
+                    queueRef.child("lastResetDate").child(specialty).setValue(todayDate);
+                    // Also reset nowServing for this specialty for the new day
+                    queueRef.child("nowServing").child(specialty).setValue(0);
+                }
 
-                                if(snapshot.exists()) {
-                                    nextNumber = snapshot.getValue(Integer.class);
-                                }
+                String queueNumber = prefix + String.format("%03d", nextNumber);
 
-                                String queueNumber = prefix + String.format("%03d", nextNumber);
+                HashMap<String, Object> queueMap = new HashMap<>();
+                queueMap.put("queueNumber", queueNumber);
+                queueMap.put("status", "Waiting");
+                queueMap.put("userId", userId);
+                queueMap.put("specialty", specialty);
+                queueMap.put("doctor", doctor);
+                queueMap.put("floor", floor);
+                queueMap.put("timestamp", ServerValue.TIMESTAMP);
 
-                                HashMap<String, Object> queueMap = new HashMap<>();
-                                queueMap.put("queueNumber", queueNumber);
-                                queueMap.put("status", "Waiting");
-                                queueMap.put("userId", userId);
-                                queueMap.put("specialty", specialty);
-                                queueMap.put("doctor", doctor);
-                                queueMap.put("floor", floor);
-                                queueMap.put("timestamp", ServerValue.TIMESTAMP);
+                // Push to global tickets
+                String ticketId = queueRef.child("tickets").push().getKey();
+                if (ticketId != null) {
+                    queueRef.child("tickets").child(ticketId).setValue(queueMap);
 
-                                // Push to global tickets
-                                String ticketId = queueRef.child("tickets").push().getKey();
-                                if (ticketId != null) {
-                                    queueRef.child("tickets").child(ticketId).setValue(queueMap);
-                                    
-                                    // Also save a reference to the patient's own profile
-                                    userRef.child("currentTicket").setValue(queueMap);
+                    // Also save a reference to the patient's own profile
+                    userRef.child("currentTicket").setValue(queueMap);
 
-                                    // Notify staff and admins
-                                    notifyStaffOfNewQueue(queueNumber, specialty, doctor);
-                                }
+                    // Notify staff and admins
+                    notifyStaffOfNewQueue(queueNumber, specialty, doctor);
+                }
 
-                                queueRef.child("nextTicketNumber").child(specialty).setValue(nextNumber + 1);
+                queueRef.child("nextTicketNumber").child(specialty).setValue(nextNumber + 1);
 
-                                Toast.makeText(
-                                        QueueActivity.this,
-                                        "Queue Ticket Generated: " + queueNumber,
-                                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                        QueueActivity.this,
+                        "Queue Ticket Generated: " + queueNumber,
+                        Toast.LENGTH_SHORT).show();
 
-                                // Automatically navigate to Status screen so they can track it
-                                android.content.Intent intent = new android.content.Intent(QueueActivity.this, QueueStatusActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }
+                // Automatically navigate to Status screen so they can track it
+                android.content.Intent intent = new android.content.Intent(QueueActivity.this, QueueStatusActivity.class);
+                startActivity(intent);
+                finish();
+            }
 
-                            @Override
-                            public void onCancelled(
-                                    @NonNull DatabaseError error) {
-                                Toast.makeText(QueueActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(QueueActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void notifyStaffOfNewQueue(String queueNumber, String specialty, String doctor) {
