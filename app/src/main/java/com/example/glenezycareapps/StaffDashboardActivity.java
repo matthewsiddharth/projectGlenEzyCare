@@ -72,7 +72,6 @@ public class StaffDashboardActivity extends AppCompatActivity {
         rootRef = FirebaseDatabase.getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
 
         fetchStaffData();
-        fetchRealTimeQueue();
         listenForNotifications();
         requestNotificationPermission();
 
@@ -145,7 +144,8 @@ public class StaffDashboardActivity extends AppCompatActivity {
                         Glide.with(StaffDashboardActivity.this).load(profilePic).placeholder(R.drawable.iconprofile).into(ivStaffProfile);
                     }
                     
-                    // Refresh UI once we have staff specialty
+                    // Start queue listener once specialty is known
+                    fetchRealTimeQueue();
                     updateWaitingListUI();
                 }
             }
@@ -155,6 +155,26 @@ public class StaffDashboardActivity extends AppCompatActivity {
     }
 
     private void fetchRealTimeQueue() {
+        String todayDate = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(new java.util.Date());
+
+        // Check for daily reset before listening to nowServing
+        rootRef.child("queue").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (staffSpecialty != null) {
+                    String lastReset = snapshot.child("lastResetDate").child(staffSpecialty).getValue(String.class);
+                    if (lastReset == null || !todayDate.equals(lastReset)) {
+                        // New day detected by staff login. Reset for this specialty.
+                        rootRef.child("queue").child("lastResetDate").child(staffSpecialty).setValue(todayDate);
+                        rootRef.child("queue").child("nowServing").child(staffSpecialty).setValue(0);
+                        rootRef.child("queue").child("nextTicketNumber").child(staffSpecialty).setValue(1);
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
         // Current Serving
         rootRef.child("queue").child("nowServing").addValueEventListener(new ValueEventListener() {
             @Override

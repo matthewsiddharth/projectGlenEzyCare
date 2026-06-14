@@ -79,7 +79,7 @@ public class StaffManagementActivity extends AppCompatActivity {
 
     private void addStaff() {
         String name = etStaffName.getText().toString().trim();
-        String email = etStaffEmail.getText().toString().trim();
+        String email = etStaffEmail.getText().toString().trim().toLowerCase();
         String role = etStaffRole.getText().toString().trim().toLowerCase();
         String specialty = spinnerStaffSpecialty.getSelectedItem().toString();
 

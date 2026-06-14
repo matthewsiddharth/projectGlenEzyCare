@@ -102,8 +102,10 @@ public class LoginActivity extends AppCompatActivity {
                     role = String.valueOf(snapshot.child("role").getValue()).trim().toLowerCase();
                 }
 
-                Log.d("LoginDebug", "Detected role: " + role);
                 boolean isAdminStaffMode = switchRole.isChecked();
+                Log.d("LoginDebug", "UID: " + userId);
+                Log.d("LoginDebug", "Detected role from DB: [" + role + "]");
+                Log.d("LoginDebug", "Toggle is ON (Staff/Admin mode): " + isAdminStaffMode);
 
                 // Requirement: Patients and Staff must verify their email. Admins are exempt.
                 if (mAuth.getCurrentUser() != null && !mAuth.getCurrentUser().isEmailVerified()) {
@@ -119,17 +121,22 @@ public class LoginActivity extends AppCompatActivity {
                 if (isAdminStaffMode) {
                     // Trying to login as Staff/Admin
                     if (role.contains("admin")) {
+                        Log.d("LoginDebug", "Redirecting to Admin Dashboard");
                         intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
                     } else if (role.contains("staff")) {
+                        Log.d("LoginDebug", "Redirecting to Staff Dashboard");
                         intent = new Intent(LoginActivity.this, StaffDashboardActivity.class);
                     } else {
+                        Log.e("LoginDebug", "Access Denied: Toggle ON but role is " + role);
                         Toast.makeText(LoginActivity.this, "Access Denied: Your account role is '" + role + "'. You are not authorized for Staff/Admin access.", Toast.LENGTH_LONG).show();
                     }
                 } else {
                     // Trying to login as Patient
                     if (role.contains("patient")) {
+                        Log.d("LoginDebug", "Redirecting to Patient Home");
                         intent = new Intent(LoginActivity.this, PatientHomeActivity.class);
                     } else {
+                        Log.e("LoginDebug", "Access Denied: Toggle OFF but role is " + role);
                         // User is staff/admin but forgot to flip the switch
                         Toast.makeText(LoginActivity.this, "Access Denied: You have a '" + role + "' account. Please use the Staff/Admin toggle to login.", Toast.LENGTH_LONG).show();
                     }

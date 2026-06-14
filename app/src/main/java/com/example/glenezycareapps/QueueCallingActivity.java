@@ -122,6 +122,23 @@ public class QueueCallingActivity extends AppCompatActivity {
     private void loadCurrentQueueStatus() {
         if (selectedSpecialty == null) return;
 
+        // Daily Reset Check
+        String todayDate = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(new java.util.Date());
+        queueRef.child("lastResetDate").child(selectedSpecialty).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String lastReset = snapshot.getValue(String.class);
+                if (!todayDate.equals(lastReset)) {
+                    // Reset for new day
+                    queueRef.child("lastResetDate").child(selectedSpecialty).setValue(todayDate);
+                    queueRef.child("nowServing").child(selectedSpecialty).setValue(0);
+                    queueRef.child("nextTicketNumber").child(selectedSpecialty).setValue(1);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
         if (nowServingListener != null) {
             queueRef.child("nowServing").child(selectedSpecialty).removeEventListener(nowServingListener);
         }

@@ -1,11 +1,8 @@
-// ==============================
-// RegisterActivity.java
-// ==============================
-
 package com.example.glenezycareapps;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -38,18 +35,14 @@ public class RegisterActivity extends AppCompatActivity {
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
-
         btnRegister = findViewById(R.id.btnRegister);
 
         mAuth = FirebaseAuth.getInstance();
 
-        usersRef = FirebaseDatabase
-                .getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
-                .getReference("users");
-        
-        staffCheckRef = FirebaseDatabase
-                .getInstance("https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/")
-                .getReference("staff");
+        // Use explicit URL for consistency
+        String dbUrl = "https://glenezycare-apps-default-rtdb.asia-southeast1.firebasedatabase.app/";
+        usersRef = FirebaseDatabase.getInstance(dbUrl).getReference("users");
+        staffCheckRef = FirebaseDatabase.getInstance(dbUrl).getReference("staff");
 
         btnRegister.setOnClickListener(v -> registerUser());
         
@@ -60,83 +53,96 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void registerUser() {
-
         String name = etName.getText().toString().trim();
-        String email = etEmail.getText().toString().trim();
+        String email = etEmail.getText().toString().trim().toLowerCase();
         String password = etPassword.getText().toString().trim();
 
         if(name.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(RegisterActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (password.length() < 6) {
-            Toast.makeText(RegisterActivity.this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Check if the email is in the pre-approved staff list
+        // 1. Create the Auth account first. This authenticates the user so they can read the staff list.
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (mAuth.getCurrentUser() != null) {
+                            String userId = mAuth.getCurrentUser().getUid();
+                            Log.d("RegisterDebug", "Auth created for UID: " + userId);
+                            checkStaffListAndCreateProfile(userId, email, name);
+                        }
+                    } else {
+                        String error = task.getException() != null ? task.getException().getMessage() : "Unknown error";
+                        Log.e("RegisterDebug", "Auth creation failed: " + error);
+                        Toast.makeText(RegisterActivity.this, "Registration failed: " + error, Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void checkStaffListAndCreateProfile(String userId, String email, String name) {
+        Log.d("RegisterDebug", "Checking staff list for: " + email);
+        
         staffCheckRef.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String role = "patient"; // Default role
+                String role = "patient";
                 String specialty = "";
+
                 if (snapshot.exists()) {
-                    // This email is pre-approved for a staff/admin role
+                    Log.d("RegisterDebug", "Staff match found!");
                     for (DataSnapshot ds : snapshot.getChildren()) {
                         role = ds.child("role").getValue(String.class);
                         specialty = ds.child("specialty").getValue(String.class);
                         if (role == null) role = "staff";
                         if (specialty == null) specialty = "";
                     }
+                } else {
+                    Log.d("RegisterDebug", "No staff match found. Assigning patient role.");
                 }
-                
-                final String finalRole = role;
-                final String finalSpecialty = specialty;
-                createAuthUser(email, password, name, finalRole, finalSpecialty);
+
+                saveUserProfile(userId, name, email, role, specialty);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                createAuthUser(email, password, name, "patient", "");
+                Log.e("RegisterDebug", "Staff check cancelled: " + error.getMessage());
+                // Fallback to patient if database read fails
+                saveUserProfile(userId, name, email, "patient", "");
             }
         });
     }
 
-    private void createAuthUser(String email, String password, String name, String role, String specialty) {
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
-                    if(task.isSuccessful()) {
-                        if (mAuth.getCurrentUser() != null) {
-                            String userId = mAuth.getCurrentUser().getUid();
+    private void saveUserProfile(String userId, String name, String email, String role, String specialty) {
+        HashMap<String, String> userMap = new HashMap<>();
+        String finalName = name;
+        if ("staff".equals(role) && !name.toLowerCase().startsWith("dr. ")) {
+            finalName = "Dr. " + name;
+        }
 
-                            HashMap<String, String> userMap = new HashMap<>();
-                            String finalName = name;
-                            if ("staff".equals(role) && !name.toLowerCase().startsWith("dr. ")) {
-                                finalName = "Dr. " + name;
-                            }
-                            userMap.put("fullName", finalName);
-                            userMap.put("email", email);
-                            userMap.put("role", role);
-                            if (!specialty.isEmpty()) {
-                                userMap.put("specialty", specialty);
-                            }
+        userMap.put("fullName", finalName);
+        userMap.put("email", email);
+        userMap.put("role", role);
+        if (!specialty.isEmpty()) {
+            userMap.put("specialty", specialty);
+        }
 
-                            usersRef.child(userId).setValue(userMap).addOnCompleteListener(dbTask -> {
-                                if (dbTask.isSuccessful()) {
-                                    if (role.equals("staff") || role.equals("admin")) {
-                                        notifyAdminsOfNewStaff(name, role);
-                                    }
-                                    sendVerificationEmail();
-                                } else {
-                                    Toast.makeText(RegisterActivity.this, "Database Error: " + dbTask.getException().getMessage(), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                        }
-                    } else {
-                        Toast.makeText(RegisterActivity.this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
+        usersRef.child(userId).setValue(userMap).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Log.d("RegisterDebug", "Profile saved successfully with role: " + role);
+                if ("staff".equals(role) || "admin".equals(role)) {
+                    notifyAdminsOfNewStaff(name, role);
+                }
+                sendVerificationEmail();
+            } else {
+                Log.e("RegisterDebug", "Failed to save profile: " + task.getException().getMessage());
+                Toast.makeText(RegisterActivity.this, "Database Error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void notifyAdminsOfNewStaff(String staffName, String role) {

@@ -324,7 +324,7 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="match_parent"
                                         android:padding="12dp"
-                                        android:src="@drawable/iconprofile"
+                                        android:src="@android:drawable/ic_menu_myplaces"
                                         app:tint="#3F51B5" />
                                 </androidx.cardview.widget.CardView>
 
@@ -546,7 +546,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/iconprofile"
+                    android:src="@android:drawable/ic_menu_myplaces"
                     app:tint="#C5CAE9" />
 
                 <TextView
