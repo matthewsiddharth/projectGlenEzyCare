@@ -514,7 +514,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/iconprofile"
+                    android:src="@android:drawable/ic_menu_myplaces"
                     app:tint="#E3F2FD" />
 
                 <TextView
